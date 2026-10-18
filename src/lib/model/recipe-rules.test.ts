@@ -9,6 +9,41 @@ import {
 import type { Recipe } from "./types";
 
 describe("recipe machine handlers", () => {
+  it("offers the LCR for Monifactory chemical recipes and uses it for large-only recipes", () => {
+    const small: Recipe = {
+      ...testRecipe("chemical_reactor", "LV"),
+      source: { datasetVersionId: "monifactory-normal-0.13.7", recipeMap: "gtceu:chemical_reactor" },
+      machineHandlers: [{
+        id: "large-chemical-reactor",
+        label: "Large Chemical Reactor",
+        machineType: "Large Chemical Reactor",
+        minimumTier: "LV",
+        kind: "multiblock",
+        perfectOverclock: true,
+      }],
+    };
+    expect(getRecipeMachineHandlers(small).map((handler) => handler.label)).toEqual([
+      "Chemical Reactor",
+      "Large Chemical Reactor",
+    ]);
+    const selected = applyMachineHandlerToRecipe(small, { machineHandlerId: "large-chemical-reactor" });
+    expect(selected.machineProfile).toMatchObject({
+      machineType: "Large Chemical Reactor",
+      kind: "multiblock",
+      perfectOverclock: true,
+    });
+    const large = {
+      ...small,
+      source: { ...small.source, recipeMap: "gtceu:large_chemical_reactor" },
+    };
+    expect(getRecipeMachineHandlers(large).map((handler) => handler.label)).toEqual([
+      "Large Chemical Reactor",
+    ]);
+    expect(getRecipeMachineHandlers({ ...small, machineHandlers: undefined }).map((handler) => handler.label)).toEqual([
+      "Chemical Reactor",
+    ]);
+  });
+
   it("uses machine handlers exported in the dataset", () => {
     const recipe = {
       ...testRecipe("Fluid Extractor"),

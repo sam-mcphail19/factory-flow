@@ -31,10 +31,11 @@ const STANDARD_SINGLEBLOCK_MAPS = new Set([
 ]);
 
 export function getMonifactorySingleblockStats(
-  recipe: Pick<Recipe, "source" | "durationTicks" | "eut" | "minimumTier">,
+  recipe: Pick<Recipe, "source" | "durationTicks" | "eut" | "minimumTier" | "machineProfile">,
   tier: Exclude<MachineTier, "DEMO">,
 ): { overclockSteps: number; durationTicks: number; eut: number } | undefined {
   if (
+    recipe.machineProfile?.kind === "multiblock" ||
     !recipe.source?.datasetVersionId?.startsWith("monifactory-") ||
     !recipe.source.recipeMap?.startsWith("gtceu:") ||
     !STANDARD_SINGLEBLOCK_MAPS.has(recipe.source.recipeMap.slice(6)) ||

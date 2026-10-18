@@ -2,6 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { createHash } from "node:crypto";
 import { gzipSync } from "node:zlib";
+import { attachChemicalReactorHandlers } from "./chemical-reactor-handlers.mjs";
 
 const [
   manifestPath,
@@ -174,6 +175,8 @@ for (const { entry, type } of selectedEntries.values()) {
     }
   }
 }
+
+attachChemicalReactorHandlers(recipes);
 
 for (const [tag, members] of itemTags) {
   if (!Array.isArray(members) || members.length === 0) continue;

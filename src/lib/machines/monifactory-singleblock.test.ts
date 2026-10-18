@@ -11,6 +11,25 @@ const recipe = {
 };
 
 describe("Monifactory GTM singleblock overclocks", () => {
+  it("uses perfect LCR overclocks for chemical recipes", () => {
+    const chemical: Recipe = {
+      id: "gtceu:chemical_reactor/example",
+      name: "Example chemical recipe",
+      machineType: "chemical_reactor",
+      source: { datasetVersionId: "monifactory-normal-0.13.7", recipeMap: "gtceu:chemical_reactor" },
+      minimumTier: "MV",
+      durationTicks: 128,
+      eut: 120,
+      inputs: [],
+      outputs: [],
+      machineHandlers: [{ id: "large-chemical-reactor", label: "Large Chemical Reactor", machineType: "Large Chemical Reactor", minimumTier: "MV", kind: "multiblock", perfectOverclock: true }],
+    };
+    const small = getOverclockedRecipeStats(chemical, { overclockTier: "EV", machineHandlerId: "chemical-reactor" });
+    const large = getOverclockedRecipeStats(chemical, { overclockTier: "EV", machineHandlerId: "large-chemical-reactor" });
+    expect(small).toMatchObject({ overclockSteps: 2, durationTicks: 32, eut: 1920 });
+    expect(large).toMatchObject({ overclockSteps: 2, perfectOverclockSteps: 2, durationTicks: 8, eut: 1920 });
+  });
+
   it("halves time and quadruples EU/t without crossing the one tick floor", () => {
     expect(getMonifactorySingleblockStats(recipe, "LV")).toEqual({
       overclockSteps: 0,

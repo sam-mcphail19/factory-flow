@@ -56,6 +56,30 @@ export function getRecipeMachineHandlers(
   if (recipe.id === CROP_FARM_PLACEHOLDER_RECIPE_ID && !recipe.machineHandlers?.length) {
     return createCropFarmPlaceholderRecipe().machineHandlers!;
   }
+  if (recipe.source?.datasetVersionId?.startsWith("monifactory-")) {
+    const map = recipe.source.recipeMap;
+    if (map === "gtceu:chemical_reactor" || map === "gtceu:large_chemical_reactor") {
+      const lcr: MachineHandler = {
+        id: "large-chemical-reactor",
+        label: "Large Chemical Reactor",
+        machineType: "Large Chemical Reactor",
+        minimumTier: recipe.minimumTier,
+        kind: "multiblock",
+        perfectOverclock: true,
+      };
+      if (map === "gtceu:large_chemical_reactor") return [lcr];
+      const small: MachineHandler = {
+        id: "chemical-reactor",
+        label: "Chemical Reactor",
+        machineType: "Chemical Reactor",
+        minimumTier: recipe.minimumTier,
+        kind: "single",
+      };
+      return recipe.machineHandlers?.some((handler) => handler.id === lcr.id)
+        ? [small, lcr]
+        : [small];
+    }
+  }
   const handlersByFamily = new Map<string, MachineHandler>();
   const fusionMark = isFusionRecipe(recipe) ? getFusionRecipeMark(recipe) : undefined;
   for (const handler of recipe.machineHandlers ?? []) {
@@ -213,6 +237,7 @@ export function applyMachineHandlerToRecipe(
         machineType: handler.machineType,
         minimumTier: handler.minimumTier,
         kind: handler.kind ?? "single",
+        perfectOverclock: handler.perfectOverclock === true,
       },
     };
   }
