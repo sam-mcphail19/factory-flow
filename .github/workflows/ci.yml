@@ -1,11 +1,8 @@
-# Typecheck + tests on every pull request and every push to main — the same
-# two commands AGENTS.md names as the verification suite. The full suite is
-# expected green: as of 2026-08-19 there are no tolerated failures, so any
-# red here is a real regression (or a test left pinning copy that changed —
-# update the pin in the same PR that changes the copy).
+# Run the verification suite on pull requests, pushes, and manual requests.
 name: CI
 
 on:
+  workflow_dispatch:
   pull_request:
   push:
     branches:
