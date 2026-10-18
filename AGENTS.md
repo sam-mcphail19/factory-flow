@@ -1,7 +1,7 @@
 # AGENTS.md
 
-GTNH Factory Flow: a production-chain planner for GregTech: New Horizons, live at
-https://gtnhplanner.com. Next.js App Router, TypeScript strict, Tailwind, React Flow,
+Monifactory Planner: a recipe browser and production-chain planner for Monifactory
+0.13.7 Normal. Next.js App Router, TypeScript strict, Tailwind, React Flow,
 Zustand, Zod, Vitest. The repo is public.
 
 This file is the always-loaded core. Each area keeps its own rules in a `CLAUDE.md`
@@ -20,6 +20,7 @@ before changing that area; it names the tests that pin its behaviour.
 | Designs, tabs, saving, account sync, plan import/export, public view | `src/store/CLAUDE.md` |
 | Server, recipe API, Supabase | `src/lib/server/CLAUDE.md` |
 | Dataset pipeline: export, normalize, rebuild, publish | `tools/dataset-pipeline/CLAUDE.md` |
+| Monifactory export and normalization | `tools/monifactory/README.md` |
 
 Longer references, read on demand: `docs/solver-equations.md` (solver doctrine),
 `docs/power-planner-math.md` (the decoded power workbook), `docs/COMMUNITY.md`.
@@ -40,8 +41,7 @@ Scratch harnesses are `*.local.test.ts` (excluded from the suite); run one with
 - `main` is the only working branch; never start another. Commit and push finished work
   unless told otherwise. Never reset or revert changes you did not make. Unmerged
   experiments survive as `archive/*` tags.
-- Push only to `origin` (`jackwrichards/gtnh-factory-flow`). `upstream` (Samiracle64, the
-  original fork, long diverged) and `kewaii` are not push targets.
+- Push only to this fork's `origin`. The GTNH source and its other remotes are not push targets.
 - CI runs typecheck, the full suite and a Chromium/Firefox icon-sizing check on every PR
   and push to main. No tolerated failures. A test that pins player-facing copy changes in
   the same commit as the copy.
@@ -60,33 +60,29 @@ Scratch harnesses are `*.local.test.ts` (excluded from the suite); run one with
 
 ## Releases and deploys
 
-- Deploy only when explicitly told to, once per instruction. Pushing `main` deploys
-  nothing. The GitHub deploy and dataset workflows are decoys (no runner); never dispatch
-  them. The deploy command lives outside the repo (the origin IP is not public).
+- Deploy only when explicitly told to, once per instruction. No production deployment
+  is configured for this fork. Pushing `main` runs CI but does not deploy.
 - `APP_VERSION` in `src/lib/version.ts` is bumped once per deploy: minor if the release
-  carries features, patch if only fixes. First check https://gtnhplanner.com/api/version:
-  behind `version.ts` means the last bump has not shipped, so fold new work into the top
-  changelog entry; equal means bump and open a new entry.
+  carries features, patch if only fixes. Once a site exists, check its `/api/version`
+  before bumping; if the last bump has not shipped, fold new work into the top changelog entry.
 - Every release has an entry in `src/lib/changelog.ts`: concrete bullets about what
   changed for players. Players open it from the header's version chip (unread dot, stamp
   `changelog-read.v1`); nothing opens by itself. Shift-click the chip for the dev menu.
 - After a deploy, check `/api/version`; after a dataset publish, check the live manifest
   and the published gzip, not just local output.
 
-## Production
+## Dataset
 
-- One DigitalOcean droplet: Caddy -> Next.js :3000, systemd unit `gtnh-flow`, releases in
-  `/opt/releases`, datasets in `/opt/shared/gtnh-datasets`, behind Cloudflare. Diagnose with
-  `journalctl -u gtnh-flow` and Caddy's JSON log `/var/lib/caddy/access.log`.
-- The server prewarms datasets on start when `GTNH_PREWARM_ON_STARTUP=1`
-  (`src/instrumentation.ts`). A slow first API call means prewarm or deploy regressed;
-  don't make the client wait longer.
-- Only GTNH 2.9 datasets are supported.
+- The Monifactory 0.13.7 Normal dataset and item icon sheets are committed under
+  `public/datasets/monifactory`; its manifest is under `public/datasets/factory`.
+- Server startup can prewarm datasets through `src/instrumentation.ts`. A slow first API
+  call means prewarm or dataset loading regressed; do not make the client wait longer.
+- Only Monifactory 0.13.7 Normal is currently supported by this fork.
 
 ## Invariants across the app
 
 - Raw exporter data is normalized by the pipeline before UI or solver code sees it.
-  Prefer exported NEI/runtime data over hand-written tables and broad fallbacks.
+  Prefer exported runtime data over hand-written tables and broad fallbacks.
 - Board performance is a requirement: no DOM measurement per edge or per frame, nothing
   O(nodes x edges) per frame, hover never rebuilds the board.
 - Every plan that arrives (import, paste, link, community copy) opens as a NEW design.
@@ -107,5 +103,4 @@ Scratch harnesses are `*.local.test.ts` (excluded from the suite); run one with
   its own `npm install`: never junction `node_modules` into one (Turbopack crashes, and
   `git worktree remove --force` follows the junction and empties the main repo's
   `node_modules`). Diff exported plans rather than trusting "same board" by eye.
-- Measure performance on `next start` with `GTNH_PREWARM_ON_STARTUP=1`, after prewarm,
-  not on the dev server.
+- Measure performance on `next start`, after dataset loading, not on the dev server.

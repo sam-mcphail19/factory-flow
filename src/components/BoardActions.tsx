@@ -184,7 +184,7 @@ export function BoardActions({
       if (!selectedDatasetVersion) {
         await importProjectAsDesign(importedProject, name);
         console.warn(
-          "Plan imported without an active GTNH dataset; embedded recipe data was kept.",
+          "Plan imported without an active dataset; embedded recipe data was kept.",
         );
         return;
       }
@@ -485,7 +485,7 @@ async function readProjectFile(file: File): Promise<string> {
   if (extension === "svg" || file.type === "image/svg+xml") {
     const projectJson = extractProjectJsonFromSvg(await file.text());
     if (!projectJson) {
-      throw new Error("This SVG does not contain a GTNH Planner plan.");
+      throw new Error("This SVG does not contain a planner plan.");
     }
     return projectJson;
   }
@@ -493,7 +493,7 @@ async function readProjectFile(file: File): Promise<string> {
   if (extension === "png" || file.type === "image/png") {
     const projectJson = await extractProjectJsonFromPng(file);
     if (!projectJson) {
-      throw new Error("This PNG does not contain a GTNH Planner plan.");
+      throw new Error("This PNG does not contain a planner plan.");
     }
     return projectJson;
   }

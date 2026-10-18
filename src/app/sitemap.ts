@@ -12,7 +12,7 @@ export const revalidate = 3600;
  * rule the unfurler uses.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://gtnhplanner.com";
+  const base = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
   const entries: MetadataRoute.Sitemap = [
     { url: `${base}/`, lastModified: new Date(), changeFrequency: "weekly", priority: 1 },
   ];

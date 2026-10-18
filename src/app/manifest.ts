@@ -2,10 +2,10 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "GTNH Planner",
-    short_name: "GTNH Planner",
+    name: "Monifactory Planner",
+    short_name: "Monifactory",
     description:
-      "Factory planner and recipe calculator for GregTech: New Horizons.",
+      "Factory planner and recipe browser for Monifactory.",
     start_url: "/",
     display: "standalone",
     background_color: "#1b1d21",

@@ -21,7 +21,7 @@ import { FactoryJsonError, parseFactoryProjectJson } from "./factory-json";
 const CODE_PREFIX = "gtnh1.";
 
 /**
- * Where a code sits in a link: `https://gtnhplanner.com/#p=<code>`. Not
+ * Where a code sits in a link: `/#p=<code>`. Not
  * "plan": `?plan=` is already a community post's link.
  */
 export const PLAN_CODE_HASH_KEY = "p";

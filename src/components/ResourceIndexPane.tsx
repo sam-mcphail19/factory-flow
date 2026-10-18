@@ -32,7 +32,7 @@ import { MinecraftTooltip } from "./nei/MinecraftTooltip";
 import { isSwatchFluid, ResourceIcon, spriteArtPixels } from "./nei/ResourceIcon";
 
 /**
- * THE ITEM PANEL: search box, six filters, sort, paged result grid and the
+ * THE ITEM PANEL: search box, four filters, sort, paged result grid and the
  * recent shelf. Shared by the items column and every item picker (product
  * drawer button, search stencil keys, library filter). The caller owns the
  * search text (the column keeps it in the store, a picker locally) and
@@ -213,7 +213,6 @@ export function ResourceIndexPane({
         kind: resourceFilterKind(resourceFilter),
         mod: resourceMod || undefined,
         sort: resourceSort,
-        source: resourceFilterSource(resourceFilter),
       },
       { signal: controller.signal },
     )
@@ -325,9 +324,8 @@ export function ResourceIndexPane({
             </p>
           ) : null}
 
-          {/* Six exclusive filters, three across in two rows so full names stay
-              readable in the narrow panel. Sort gets its own full-width row. */}
-          <div className="mt-1 grid grid-cols-3 gap-1">
+          {/* Four exclusive filters fit across two rows in the narrow panel. */}
+          <div className="mt-1 grid grid-cols-2 gap-1">
             {RESOURCE_FILTER_CHOICES.map((choice) => (
               <button
                 key={choice.mode}
@@ -350,7 +348,7 @@ export function ResourceIndexPane({
               onChange={(event) => setResourceSort(event.target.value as ResourceSortMode)}
               title="Sort results"
               aria-label="Sort results"
-              className="col-span-3 h-6 min-w-0 rounded-[4px] border border-neutral-700 bg-[#17191d] px-1.5 text-[11px] text-neutral-100 outline-none"
+              className="col-span-2 h-6 min-w-0 rounded-[4px] border border-neutral-700 bg-[#17191d] px-1.5 text-[11px] text-neutral-100 outline-none"
             >
               <option value="popular">Most popular</option>
               <option value="relevance">Best match</option>
@@ -381,11 +379,7 @@ export function ResourceIndexPane({
               emptyLabel={
                 onBoard
                   ? "Nothing placed on the board yet."
-                  : resourceFilter === "plants"
-                    ? "No crop grows that."
-                    : resourceFilter === "bees"
-                      ? "No bee makes that."
-                      : undefined
+                  : undefined
               }
               activeResource={activeResource}
               onPageChange={setResourcePage}
@@ -427,11 +421,10 @@ const RESOURCE_WHEEL_PAGE_DELTA = 80;
 type ResourceSortMode = "relevance" | "popular" | "name" | "mod" | "made" | "uses";
 
 /**
- * The list's filter: six mutually exclusive answers, because the kind and
- * source filters never usefully combine. "Board" is answered from the
+ * The list's filter: four mutually exclusive answers. "Board" is answered from the
  * project in memory rather than the server.
  */
-type ResourceFilterMode = "all" | "item" | "fluid" | "board" | "plants" | "bees";
+type ResourceFilterMode = "all" | "item" | "fluid" | "board";
 
 const RESOURCE_FILTER_CHOICES: Array<{
   mode: ResourceFilterMode;
@@ -442,18 +435,13 @@ const RESOURCE_FILTER_CHOICES: Array<{
   { mode: "item", label: "Items", title: "Items" },
   { mode: "fluid", label: "Fluids", title: "Fluids" },
   { mode: "board", label: "Placed", title: "On this board" },
-  { mode: "plants", label: "CropsNH", title: "Grown" },
-  { mode: "bees", label: "Bees", title: "From bees" },
 ];
 
-/** The dataset query only knows kinds and sources; this splits the choice up. */
+/** The dataset query accepts the selected resource kind. */
 function resourceFilterKind(filter: ResourceFilterMode): "item" | "fluid" | undefined {
   return filter === "item" || filter === "fluid" ? filter : undefined;
 }
 
-function resourceFilterSource(filter: ResourceFilterMode): "plants" | "bees" | undefined {
-  return filter === "plants" || filter === "bees" ? filter : undefined;
-}
 
 /**
  * A tile's hover tooltip: the name, then its mod and recipe count, then any

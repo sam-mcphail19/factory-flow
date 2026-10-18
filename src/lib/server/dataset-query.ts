@@ -11,12 +11,7 @@ import type {
   RecipeMapIconEntry,
   RecipeSummary,
 } from "@/lib/datasets/types";
-import type {
-  MachineTier,
-  Recipe,
-  ResourceAlternative,
-  ResourceAmount,
-} from "@/lib/model/types";
+import type { MachineTier, Recipe, ResourceAlternative, ResourceAmount } from "@/lib/model/types";
 import {
   AUTO_WORKBENCH_HANDLER_ID,
   CROP_HARVESTER_INDUSTRIAL_FARM_ID,
@@ -194,7 +189,8 @@ const BEE_RECIPE_MAPS = new Set(["Bee Produce"]);
 
 export type ResourceSourceFilter = "plants" | "bees";
 
-const datasetRoot = path.join(process.cwd(), "public", "datasets", "gtnh");
+const datasetRoot =
+  process.env.FACTORY_DATASET_ROOT ?? path.join(process.cwd(), "public", "datasets", "gtnh");
 const loadedCatalogs = new Map<string, LoadedRecipeIndex>();
 const pendingCatalogLoads = new Map<string, Promise<LoadedRecipeIndex>>();
 const pendingRecipeIndexLoads = new Map<string, Promise<LoadedRecipeIndex>>();
@@ -215,6 +211,7 @@ export async function getDatasetCatalog(versionId: string) {
   return {
     schemaVersion: 1 as const,
     datasetVersionId: catalog.version.id,
+    pack: catalog.version.pack,
     gtnhVersion: catalog.version.gtnhVersion,
     sourceInfo: catalog.version.sourceInfo,
     resources: [],
@@ -268,7 +265,9 @@ export function withTankMapFace(
   if (!icons?.some((entry) => entry.recipeMap === TANK_RECIPE_MAP)) {
     return icons;
   }
-  const byName = new Map(catalog.resources.map((resource) => [resource.displayName, resource] as const));
+  const byName = new Map(
+    catalog.resources.map((resource) => [resource.displayName, resource] as const),
+  );
   const face = TANK_MAP_FACE_ITEM_NAMES.map((name) => byName.get(name)).find(Boolean);
   if (!face) {
     return icons;
@@ -294,7 +293,9 @@ export function withTankMapFace(
 
 function withSynthesizedHandlerIcons(catalog: LoadedRecipeIndex): MachineHandlerIconEntry[] {
   const icons = [...(catalog.machineHandlerIcons ?? [])];
-  const byName = new Map(catalog.resources.map((resource) => [resource.displayName, resource] as const));
+  const byName = new Map(
+    catalog.resources.map((resource) => [resource.displayName, resource] as const),
+  );
   for (const { familyId, displayNames, tierNames } of SYNTHESIZED_HANDLER_FACES) {
     if (icons.some((entry) => entry.familyId === familyId)) {
       continue;
@@ -483,7 +484,9 @@ function lookupCandidateIndexes(lookup: LoadedRecipeLookupIndex, ref: DatasetRec
       break;
     }
   }
-  return [...new Set(indexes)].sort((left, right) => left - right).slice(0, RECIPE_REF_CANDIDATE_LIMIT);
+  return [...new Set(indexes)]
+    .sort((left, right) => left - right)
+    .slice(0, RECIPE_REF_CANDIDATE_LIMIT);
 }
 
 /**
@@ -524,13 +527,7 @@ async function loadRecipeBodies(
 }
 
 export type ResourceQuerySort =
-  | "relevance"
-  | "name"
-  | "mod"
-  | "recipes"
-  | "made"
-  | "uses"
-  | "popular";
+  "relevance" | "name" | "mod" | "recipes" | "made" | "uses" | "popular";
 
 /**
  * How many recipes MAKE and how many USE each resource, read off the same
@@ -604,6 +601,7 @@ export async function queryDatasetResources(
 ) {
   const catalog = await loadCatalog(versionId);
   const indexes = ensureResourceIndexes(catalog);
+  const needsExportedIcon = !catalog.version.pack || catalog.version.pack.id === "gtnh";
   const sourceKeys = request.source
     ? await getPassiveSourceResourceKeys(catalog, request.source)
     : undefined;
@@ -625,7 +623,7 @@ export async function queryDatasetResources(
         if (
           !resource ||
           isVirtualChoiceResource(resource) ||
-          (!resource.iconPath && !resource.iconAtlas)
+          (needsExportedIcon && !resource.iconPath && !resource.iconAtlas)
         ) {
           continue;
         }
@@ -779,8 +777,7 @@ function sortResourceMatches(
   // to the thing with the most ways to MAKE it, which is the item a planner
   // most likely came to place.
   return [...matches].sort(
-    (left, right) =>
-      right.score - left.score || countsOf(right).madeBy - countsOf(left).madeBy,
+    (left, right) => right.score - left.score || countsOf(right).madeBy - countsOf(left).madeBy,
   );
 }
 
@@ -1000,10 +997,7 @@ export function orderByRecipeMap<T extends { recipeIndex: number }>(
 }
 
 /** {@link RankedRecipe.focus}, read against one recipe body. */
-function recipeFocusScore(
-  summary: RecipeSummary,
-  clauses: RecipeQueryClause[],
-): number {
+function recipeFocusScore(summary: RecipeSummary, clauses: RecipeQueryClause[]): number {
   const makesClauses = clauses.filter((clause) => clause.role === "makes");
   const takesClauses = clauses.filter((clause) => clause.role === "takes");
   let total = 0;
@@ -1179,9 +1173,7 @@ async function queryDatasetRecipesFromLookup(
 
   // Only a typed query needs the words index, and building it walks every
   // recipe: browsing a resource must not pay for one.
-  const search = parsedQuery.terms.length
-    ? await getRecipeSearchIndex(catalog, lookup)
-    : undefined;
+  const search = parsedQuery.terms.length ? await getRecipeSearchIndex(catalog, lookup) : undefined;
   let scopedByMap = clauses.length
     ? tierFilteredByMap(
         lookup,
@@ -1209,7 +1201,11 @@ async function queryDatasetRecipesFromLookup(
   // the words matched.
   const tierCandidatesByMap =
     scopedByMap ??
-    tierFilteredByMap(lookup, groupRecipesByMap(lookup, searchScores?.keys() ?? []), request.maxTier);
+    tierFilteredByMap(
+      lookup,
+      groupRecipesByMap(lookup, searchScores?.keys() ?? []),
+      request.maxTier,
+    );
   const countedRecipeMaps = [...tierCandidatesByMap.entries()]
     .map(([recipeMapId, recipeIndexes]) => {
       const recipeMap = lookup.recipeMaps[recipeMapId];
@@ -1354,10 +1350,13 @@ function getClauseLookupRecipesByMap(
  */
 const ONLY_VERIFY_LIMIT = 5000;
 
-function hasOnlySide(clauses: RecipeQueryClause[], ops: {
-  takesOp?: RecipeQuerySideOp;
-  makesOp?: RecipeQuerySideOp;
-}): boolean {
+function hasOnlySide(
+  clauses: RecipeQueryClause[],
+  ops: {
+    takesOp?: RecipeQuerySideOp;
+    makesOp?: RecipeQuerySideOp;
+  },
+): boolean {
   return (
     (ops.takesOp === "only" && clauses.some((clause) => clause.role === "takes")) ||
     (ops.makesOp === "only" && clauses.some((clause) => clause.role === "makes"))
@@ -2854,7 +2853,6 @@ function resourceSearchTerms(
     ...(indexed?.tooltip ?? []),
   ].filter((term): term is string => Boolean(term));
 }
-
 
 function buildRecipeMapIconMap(
   recipeMaps: string[],

@@ -111,14 +111,14 @@ const uiScaleBoot = uiScaleBootScript({
   snugMaxWidth: SNUG_MAX_WIDTH,
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://gtnhplanner.com";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  applicationName: "GTNH Planner",
-  title: "GTNH Planner | GregTech New Horizons Factory Calculator",
+  applicationName: "Monifactory Planner",
+  title: "Monifactory Planner | Factory Recipe Planner",
   description:
-    "Plan and optimize GregTech: New Horizons factories on an interactive flowchart. Full recipe data for GTNH 2.9, throughput and power calculation, machine ratios, and community-shared plans.",
+    "Explore Monifactory recipes and plan production chains on an interactive flowchart.",
   alternates: {
     canonical: "/",
   },
@@ -134,26 +134,24 @@ export const metadata: Metadata = {
     },
   },
   keywords: [
-    "GTNH Planner",
-    "GregTech New Horizons planner",
-    "GTNH factory planner",
-    "GTNH recipe calculator",
-    "GTNH throughput calculator",
-    "GregTech factory calculator",
+    "Monifactory Planner",
+    "Monifactory recipes",
+    "Monifactory factory planner",
+    "GregTech Modern factory planner",
   ],
   openGraph: {
-    title: "GTNH Planner | GregTech New Horizons Factory Calculator",
+    title: "Monifactory Planner | Factory Recipe Planner",
     description:
-      "Free factory planner for GregTech: New Horizons with full recipe data for GTNH 2.9. Draw production chains, balance machine ratios, find bottlenecks, and share plans with the community.",
-    siteName: "GTNH Planner",
+      "Explore Monifactory recipes and plan production chains on an interactive flowchart.",
+    siteName: "Monifactory Planner",
     type: "website",
     url: "/",
   },
   twitter: {
     card: "summary_large_image",
-    title: "GTNH Planner | GregTech New Horizons Factory Calculator",
+    title: "Monifactory Planner | Factory Recipe Planner",
     description:
-      "Free factory planner for GregTech: New Horizons with full recipe data for GTNH 2.9. Draw production chains, balance machine ratios, find bottlenecks, and share plans with the community.",
+      "Explore Monifactory recipes and plan production chains on an interactive flowchart.",
   },
   icons: {
     icon: [
@@ -178,7 +176,7 @@ export const viewport: Viewport = {
 /**
  * What the site is, said in schema.org's terms for crawlers that read
  * structured data. Kept to claims a machine can verify: free, runs in a
- * browser, about GregTech: New Horizons.
+ * browser, about Monifactory.
  */
 const structuredData = {
   "@context": "https://schema.org",
@@ -187,16 +185,16 @@ const structuredData = {
       "@type": "WebSite",
       "@id": `${siteUrl}/#website`,
       url: `${siteUrl}/`,
-      name: "GTNH Planner",
+      name: "Monifactory Planner",
     },
     {
       "@type": "WebApplication",
       "@id": `${siteUrl}/#app`,
       url: `${siteUrl}/`,
-      name: "GTNH Planner",
-      alternateName: "GregTech New Horizons Factory Planner",
+      name: "Monifactory Planner",
+      alternateName: "Monifactory Factory Planner",
       description:
-        "Free factory planner and recipe calculator for GregTech: New Horizons. Draw production chains on a flowchart, balance machine ratios, compute power and throughput, and share plans.",
+        "Explore Monifactory recipes and draw production chains on a flowchart.",
       applicationCategory: "GameApplication",
       operatingSystem: "Any",
       browserRequirements: "Requires JavaScript",
@@ -204,7 +202,7 @@ const structuredData = {
       offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
       about: {
         "@type": "VideoGame",
-        name: "GregTech: New Horizons",
+        name: "Monifactory",
         gamePlatform: "Minecraft",
       },
     },

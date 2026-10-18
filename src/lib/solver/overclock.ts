@@ -2,6 +2,7 @@ import { hasAmperageOverclock } from "./power-input-rules";
 import { getFusionStats } from "@/lib/machines/fusion";
 import { getEecMetadata, getEecSettings, getEecStats } from "@/lib/machines/extreme-entity-crusher";
 import { getTgsStats, isTgsRecipe } from "@/lib/machines/tree-growth-simulator";
+import { getMonifactorySingleblockStats } from "@/lib/machines/monifactory-singleblock";
 import {
   GT_VOLTAGE_TIERS,
   getRecipeMinimumVoltageTier,
@@ -10,7 +11,12 @@ import {
 } from "@/lib/model/tiers";
 import { applyMachineHandlerToRecipe } from "@/lib/model/recipe-rules";
 import { getHeatOverclockStats } from "./heat";
-import { getEffectiveVoltageOrdinal, getNodePowerAmps, getNodeRunTier, isMultiblockRecipe } from "./power";
+import {
+  getEffectiveVoltageOrdinal,
+  getNodePowerAmps,
+  getNodeRunTier,
+  isMultiblockRecipe,
+} from "./power";
 import {
   buildMachineContext,
   getBeeMegaApiaryTierEutMultiplier,
@@ -85,7 +91,12 @@ export function getOverclockedRecipeStats(
     Partial<
       Pick<
         FactoryNode,
-        "energyHatches" | "energyHatchType" | "powerEuT" | "hatchVoltageTier" | "hatchAmps" | "powerInputMode"
+        | "energyHatches"
+        | "energyHatchType"
+        | "powerEuT"
+        | "hatchVoltageTier"
+        | "hatchAmps"
+        | "powerInputMode"
       >
     >,
 ): OverclockedRecipeStats {
@@ -108,10 +119,14 @@ export function getOverclockedRecipeStats(
   const fusion = getFusionStats(effectiveRecipe);
   if (fusion) {
     return {
-      tier: fusion.tier, minimumTier,
-      overclockSteps: fusion.steps, perfectOverclockSteps: fusion.steps,
-      perfectSpeedFactor: fusion.factor, perfectEuFactor: fusion.factor,
-      durationTicks: quantiseDurationToTicks(fusion.durationTicks, true), eut: fusion.eut,
+      tier: fusion.tier,
+      minimumTier,
+      overclockSteps: fusion.steps,
+      perfectOverclockSteps: fusion.steps,
+      perfectSpeedFactor: fusion.factor,
+      perfectEuFactor: fusion.factor,
+      durationTicks: quantiseDurationToTicks(fusion.durationTicks, true),
+      eut: fusion.eut,
     };
   }
   // A multiblock's pick stands even below the recipe's minimum - an
@@ -119,6 +134,17 @@ export function getOverclockedRecipeStats(
   // never silently promoted. A singleblock is floored at the minimum, because
   // a lower machine does not exist to be built.
   const tier = getNodeRunTier(effectiveRecipe, node);
+  const monifactorySingleblock = getMonifactorySingleblockStats(effectiveRecipe, tier);
+  if (monifactorySingleblock) {
+    return {
+      tier,
+      minimumTier,
+      overclockSteps: monifactorySingleblock.overclockSteps,
+      ...PLAIN_OVERCLOCK_STEPS,
+      durationTicks: monifactorySingleblock.durationTicks,
+      eut: monifactorySingleblock.eut,
+    };
+  }
   const eec = getEecMetadata(effectiveRecipe);
   if (eec) {
     // kubatech's own overclock, infernals and ritual; the duration returned
@@ -298,7 +324,9 @@ export function getOverclockedRecipeStats(
     perfectOverclockSteps: perfectSteps,
     perfectSpeedFactor: rule.multiplier,
     perfectEuFactor: rule.euMultiplier ?? rule.multiplier,
-    durationTicks: (getMachineBehaviour(effectiveRecipe.machineType)?.quantiseDuration ?? quantiseDurationToTicks)(
+    durationTicks: (
+      getMachineBehaviour(effectiveRecipe.machineType)?.quantiseDuration ?? quantiseDurationToTicks
+    )(
       (effectiveRecipe.durationTicks / rule.multiplier ** perfectSteps / 2 ** normalSteps) *
         durationMultiplier,
       subTickCapable,
@@ -396,4 +424,3 @@ function resolveOverclockRule(
   }
   return recipe.machineProfile?.perfectOverclock ? OVERCLOCK.perfect() : OVERCLOCK.normal();
 }
-

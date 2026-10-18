@@ -4,7 +4,6 @@ import { encodePlanCode, planCodeLink } from "@/lib/import-export/plan-code";
 import { isCommunityConfigured } from "@/lib/server/community";
 import {
   FEEDBACK_MAX_BYTES,
-  FEEDBACK_REPO,
   type FeedbackLinks,
   issueBody,
   issueLabels,
@@ -20,9 +19,6 @@ import { claimIssue, feedbackGate, looksSentByTheGame } from "@/lib/server/feedb
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-/** Where the issues are opened, and the site the links point at. */
-const SITE = "https://gtnhplanner.com";
-
 /** A refusal, counted towards the gate's flood pause. */
 function refuse(status: number, error: string): NextResponse {
   feedbackGate.refused();
@@ -35,7 +31,9 @@ function refuse(status: number, error: string): NextResponse {
  */
 export async function POST(request: Request) {
   const token = process.env.GITHUB_FEEDBACK_TOKEN;
-  if (!token || !isCommunityConfigured()) {
+  const repo = process.env.GITHUB_FEEDBACK_REPO;
+  const site = process.env.NEXT_PUBLIC_SITE_URL;
+  if (!token || !repo || !site || !isCommunityConfigured()) {
     return NextResponse.json({ error: "Reports can't be sent yet." }, { status: 503 });
   }
   const gate = feedbackGate.admit();
@@ -77,13 +75,13 @@ export async function POST(request: Request) {
       const { name, plan } = report.plans[i]!;
       let link: string | undefined;
       try {
-        const candidate = planCodeLink(await encodePlanCode(plan), SITE);
+        const candidate = planCodeLink(await encodePlanCode(plan), site);
         link = linkFits(candidate) ? candidate : undefined;
       } catch {
         link = undefined;
       }
       const file = await storeFeedbackFile(
-        SITE,
+        site,
         id,
         `plan-${i + 1}.json`,
         Buffer.from(planFile(plan)),
@@ -92,11 +90,11 @@ export async function POST(request: Request) {
       links.plans.push({ name, cards: plan.nodes.length, link, file });
     }
     if (report.picture) {
-      links.picture = await storeFeedbackFile(SITE, id, "picture.png", report.picture, "image/png");
+      links.picture = await storeFeedbackFile(site, id, "picture.png", report.picture, "image/png");
     }
 
     const { body, plansComment } = issueBody(report, links);
-    const issue = await openIssue(token, process.env.GITHUB_FEEDBACK_REPO || FEEDBACK_REPO, {
+    const issue = await openIssue(token, repo, {
       title: issueTitle(report),
       body,
       labels: issueLabels(report),

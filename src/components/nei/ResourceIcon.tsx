@@ -1,6 +1,14 @@
 "use client";
 
-import { memo, useCallback, useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type CSSProperties,
+} from "react";
 import {
   getAlternativeCycleFaces,
   getAlternativeCycleTick,
@@ -112,7 +120,9 @@ function ResourceIconComponent({
       {resource && showAmount ? <AmountLabel resource={resource} /> : null}
 
       {/* Circuits get no "NC" marker: they are a machine setting, never consumed. */}
-      {showConsumedState && resource?.consumed === false && !isProgrammedCircuitResource(resource) ? (
+      {showConsumedState &&
+      resource?.consumed === false &&
+      !isProgrammedCircuitResource(resource) ? (
         <span
           title="Not consumed"
           className="absolute left-0 top-0 font-mono text-[8px] font-black leading-none text-[#ffff55] drop-shadow-[1px_1px_0_#000]"
@@ -122,9 +132,7 @@ function ResourceIconComponent({
       ) : null}
 
       {resource && alternativeState === "locked" && shouldShowAlternativeMarker(resource) ? (
-        <span
-          className="absolute left-0 bottom-0 font-mono text-[9px] font-black leading-none text-[#ffaa00] drop-shadow-[1px_1px_0_#000]"
-        >
+        <span className="absolute left-0 bottom-0 font-mono text-[9px] font-black leading-none text-[#ffaa00] drop-shadow-[1px_1px_0_#000]">
           ■
         </span>
       ) : null}
@@ -144,7 +152,9 @@ function ResourceIconComponent({
   // Built only on the tooltip path: icons rendered with `tooltip={false}`
   // number in the hundreds and must skip this string build.
   return (
-    <MinecraftTooltip label={buildTooltipLabel(resource, alternativeState)}>{icon}</MinecraftTooltip>
+    <MinecraftTooltip label={buildTooltipLabel(resource, alternativeState)}>
+      {icon}
+    </MinecraftTooltip>
   );
 }
 
@@ -166,10 +176,7 @@ function atlasEquals(a?: ResourceIconAtlasRef, b?: ResourceIconAtlasRef): boolea
   );
 }
 
-function displayResourceEquals(
-  a?: DisplayResourceAmount,
-  b?: DisplayResourceAmount,
-): boolean {
+function displayResourceEquals(a?: DisplayResourceAmount, b?: DisplayResourceAmount): boolean {
   if (a === b) {
     return true;
   }
@@ -292,11 +299,13 @@ function isOreDictionaryNoiseLine(line: string): boolean {
 // Only this leaf subscribes to the clock. Names, amounts, handles, wire colors
 // and the solver never see a preview face. Concrete resources stay still.
 function CategoryIconImage(props: { resource?: DisplayResourceAmount; iconPixelSize?: number }) {
-  const faces = props.resource && isOreDictionaryResource(props.resource)
-    ? getAlternativeCycleFaces(props.resource).filter((face) => face.iconPath || face.iconAtlas)
-    : [];
+  const faces =
+    props.resource && isOreDictionaryResource(props.resource)
+      ? getAlternativeCycleFaces(props.resource).filter((face) => face.iconPath || face.iconAtlas)
+      : [];
   if (!props.resource || faces.length === 0) return <IconImage {...props} />;
-  if (faces.length === 1) return <IconImage resource={faces[0]} iconPixelSize={props.iconPixelSize} />;
+  if (faces.length === 1)
+    return <IconImage resource={faces[0]} iconPixelSize={props.iconPixelSize} />;
   return <CyclingCategoryIcon faces={faces} iconPixelSize={props.iconPixelSize} />;
 }
 
@@ -323,7 +332,10 @@ function observeCategoryIcon(element: Element, onVisible: (visible: boolean) => 
   };
 }
 
-function CyclingCategoryIcon({ faces, iconPixelSize }: {
+function CyclingCategoryIcon({
+  faces,
+  iconPixelSize,
+}: {
   faces: AlternativeCycleFace[];
   iconPixelSize?: number;
 }) {
@@ -334,10 +346,13 @@ function CyclingCategoryIcon({ faces, iconPixelSize }: {
   }, []);
   // IntersectionObserver tracks clipping, but CSS visibility preserves the
   // hidden detail layer's layout box. Skip those copies before notifying React.
-  const subscribeVisible = useCallback((notify: () => void) =>
-    subscribeToAlternativeCycle(() => {
-      if (ref.current && getComputedStyle(ref.current).visibility !== "hidden") notify();
-    }), []);
+  const subscribeVisible = useCallback(
+    (notify: () => void) =>
+      subscribeToAlternativeCycle(() => {
+        if (ref.current && getComputedStyle(ref.current).visibility !== "hidden") notify();
+      }),
+    [],
+  );
   const tick = useSyncExternalStore(
     visible ? subscribeVisible : subscribeToNothing,
     visible ? getAlternativeCycleTick : getServerAlternativeCycleTick,
@@ -356,7 +371,10 @@ function categoryFaceKey(face: AlternativeCycleFace): string {
 
 /** Two persistent layers trade places after decoding. Reusing them avoids
  * remounting the sprite tree on every tick, including on large boards. */
-function CategoryIconTransition({ face, iconPixelSize }: {
+function CategoryIconTransition({
+  face,
+  iconPixelSize,
+}: {
   face: AlternativeCycleFace;
   iconPixelSize?: number;
 }) {
@@ -370,9 +388,12 @@ function CategoryIconTransition({ face, iconPixelSize }: {
     const key = categoryFaceKey(face);
     setFrames((current) => {
       if (categoryFaceKey(current.faces[current.shown]!) === key) {
-        return current.pending !== undefined ? { faces: current.faces, shown: current.shown } : current;
+        return current.pending !== undefined
+          ? { faces: current.faces, shown: current.shown }
+          : current;
       }
-      if (current.pending !== undefined && categoryFaceKey(current.faces[current.pending]!) === key) return current;
+      if (current.pending !== undefined && categoryFaceKey(current.faces[current.pending]!) === key)
+        return current;
       const pending = current.shown === 0 ? 1 : 0;
       const faces: typeof current.faces = [...current.faces];
       faces[pending] = face;
@@ -380,31 +401,57 @@ function CategoryIconTransition({ face, iconPixelSize }: {
     });
   }, [face]);
   const markReady = useCallback((key: string) => {
-    setFrames((current) => current.pending !== undefined && categoryFaceKey(current.faces[current.pending]!) === key && !current.ready
-      ? { ...current, ready: true } : current);
+    setFrames((current) =>
+      current.pending !== undefined &&
+      categoryFaceKey(current.faces[current.pending]!) === key &&
+      !current.ready
+        ? { ...current, ready: true }
+        : current,
+    );
   }, []);
   const finish = useCallback((key: string) => {
-    setFrames((current) => current.pending !== undefined && current.ready && categoryFaceKey(current.faces[current.pending]!) === key
-      ? { faces: current.faces, shown: current.pending } : current);
+    setFrames((current) =>
+      current.pending !== undefined &&
+      current.ready &&
+      categoryFaceKey(current.faces[current.pending]!) === key
+        ? { faces: current.faces, shown: current.pending }
+        : current,
+    );
   }, []);
   return (
     <span className="relative flex h-full w-full items-center justify-center">
-      {frames.faces.map((entry, index) => entry && (
-        <CategoryIconFrame
-          key={index}
-          face={entry}
-          iconPixelSize={iconPixelSize}
-          phase={index === frames.shown ? frames.ready ? "outgoing" : "current"
-            : index === frames.pending && frames.ready ? "incoming" : "loading"}
-          onReady={markReady}
-          onFinish={finish}
-        />
-      ))}
+      {frames.faces.map(
+        (entry, index) =>
+          entry && (
+            <CategoryIconFrame
+              key={index}
+              face={entry}
+              iconPixelSize={iconPixelSize}
+              phase={
+                index === frames.shown
+                  ? frames.ready
+                    ? "outgoing"
+                    : "current"
+                  : index === frames.pending && frames.ready
+                    ? "incoming"
+                    : "loading"
+              }
+              onReady={markReady}
+              onFinish={finish}
+            />
+          ),
+      )}
     </span>
   );
 }
 
-const CategoryIconFrame = memo(function CategoryIconFrame({ face, iconPixelSize, phase, onReady, onFinish }: {
+const CategoryIconFrame = memo(function CategoryIconFrame({
+  face,
+  iconPixelSize,
+  phase,
+  onReady,
+  onFinish,
+}: {
   face: AlternativeCycleFace;
   iconPixelSize?: number;
   phase: "current" | "loading" | "incoming" | "outgoing";
@@ -462,7 +509,14 @@ function IconImage({
 
   const atlas = resource.iconAtlas;
   if (atlas) {
-    return <AtlasIconImage resource={resource} atlas={atlas} iconPixelSize={iconPixelSize} onReady={onReady} />;
+    return (
+      <AtlasIconImage
+        resource={resource}
+        atlas={atlas}
+        iconPixelSize={iconPixelSize}
+        onReady={onReady}
+      />
+    );
   }
 
   // POWER has no sprite anywhere: EU is app-synthesized, and its face is a
@@ -480,7 +534,18 @@ function IconImage({
       return <FluidIconImage resource={resource} iconPixelSize={iconPixelSize} />;
     }
 
-    return null;
+    const label = resource.displayName ?? resource.id.split(":").pop() ?? resource.id;
+    const words = label.trim().split(/\s+/);
+    const initials =
+      words.length > 1 ? `${words[0]?.[0] ?? ""}${words[1]?.[0] ?? ""}` : label.slice(0, 2);
+    return (
+      <span
+        aria-hidden="true"
+        className="flex h-3/4 w-3/4 items-center justify-center rounded bg-neutral-700 font-mono text-[11px] font-bold uppercase text-neutral-100"
+      >
+        {initials}
+      </span>
+    );
   }
 
   if (resource.kind === "aspect") {
@@ -489,7 +554,14 @@ function IconImage({
     );
   }
 
-  return <SpriteImage resource={resource} iconPath={iconPath} iconPixelSize={iconPixelSize} onReady={onReady} />;
+  return (
+    <SpriteImage
+      resource={resource}
+      iconPath={iconPath}
+      iconPixelSize={iconPixelSize}
+      onReady={onReady}
+    />
+  );
 }
 
 /**
@@ -556,8 +628,15 @@ function SpriteImage({
     if (!image) return;
     // onLoad alone can precede decoding; never uncover an undecoded frame.
     const decoded = image.decode ? image.decode() : Promise.resolve();
-    void decoded.then(() => { if (active) onReady(); }, () => {});
-    return () => { active = false; };
+    void decoded.then(
+      () => {
+        if (active) onReady();
+      },
+      () => {},
+    );
+    return () => {
+      active = false;
+    };
   }, [status, iconPath, onReady]);
 
   return (
@@ -585,7 +664,9 @@ function SpriteImage({
           alt={resourceLabel(resource)}
           draggable={false}
           onLoad={(event) => {
-            setFitScale(resource.kind === "item" ? getSpriteFitScale(event.currentTarget) : undefined);
+            setFitScale(
+              resource.kind === "item" ? getSpriteFitScale(event.currentTarget) : undefined,
+            );
             setStatus("loaded");
           }}
           onError={() => setStatus("failed")}
@@ -867,12 +948,23 @@ function AtlasIconImage({
     const image = new Image();
     image.onload = () => {
       if (!active) return;
-      if (resource.kind === "item") setFitScale(getSpriteFitScale(image, {
-        x: atlas.x, y: atlas.y, width: atlas.width, height: atlas.height,
-      }));
+      if (resource.kind === "item")
+        setFitScale(
+          getSpriteFitScale(image, {
+            x: atlas.x,
+            y: atlas.y,
+            width: atlas.width,
+            height: atlas.height,
+          }),
+        );
       if (onReady) {
         const decoded = image.decode ? image.decode() : Promise.resolve();
-        void decoded.then(() => { if (active) onReady(); }, () => {});
+        void decoded.then(
+          () => {
+            if (active) onReady();
+          },
+          () => {},
+        );
       }
     };
     image.src = atlas.imagePath;

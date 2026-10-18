@@ -233,11 +233,11 @@ export async function GET(
             }}
           >
             <div style={{ display: "flex", fontSize: 28, fontWeight: 700, color: BRAND }}>
-              gtnhplanner.com
+              Monifactory Planner
             </div>
             {row.game_version ? (
               <div style={{ display: "flex", fontSize: 21, color: MUTED }}>
-                GTNH {row.game_version}
+                {row.game_version}
               </div>
             ) : null}
           </div>

@@ -7,11 +7,20 @@ import type {
 } from "../model/types";
 
 export interface DatasetSourceInfo {
-  sourceId: "nesql" | "recex" | "nerd" | "gtnh-oracle" | "unknown";
+  sourceId:
+    "nesql" | "recex" | "nerd" | "gtnh-oracle" | "gtm-exporter" | "kubejs-exporter" | "unknown";
   sourceVersion?: string;
   generatedAt: string;
   gitCommit?: string;
   notes?: string;
+}
+
+/** Pack identity is separate from the dataset build and its release channel. */
+export interface DatasetPack {
+  id: string;
+  name: string;
+  version: string;
+  mode?: string;
 }
 
 export interface DatasetResource {
@@ -62,7 +71,9 @@ export interface MachineHandlerIconEntry {
 
 export interface DatasetVersion {
   id: string;
-  gtnhVersion: string;
+  pack?: DatasetPack;
+  /** Kept for manifests published before pack metadata was introduced. */
+  gtnhVersion?: string;
   channel: "stable" | "daily" | "experimental";
   publishedAt: string;
   manifestPath: string;
@@ -84,7 +95,9 @@ export interface DatasetManifest {
 export interface RecipeDataset {
   schemaVersion: 1;
   datasetVersionId: string;
-  gtnhVersion: string;
+  pack?: DatasetPack;
+  /** Kept for existing GTNH exports. */
+  gtnhVersion?: string;
   sourceInfo: DatasetSourceInfo;
   resources: DatasetResource[];
   resourceIndex?: DatasetResourceIndexEntry[];

@@ -167,6 +167,24 @@ describe("RecipeBrowser", () => {
     );
   });
 
+  it("shows unknown rates and keeps those recipes out of plans", async () => {
+    const response = await browserLoaderMock.queryRecipeDatasetRecipes();
+    browserLoaderMock.queryRecipeDatasetRecipes.mockResolvedValueOnce({
+      ...response,
+      recipes: response.recipes.map((recipe) => ({
+        ...recipe,
+        metadata: { rateUnknown: true },
+      })),
+    });
+    render(<RecipeBrowser onLoadDatasetVersion={() => {}} />);
+    const card = (await screen.findByText("Rate unknown")).closest("article")!;
+    expect(card.querySelector('[aria-label="Add recipe node"]')?.hasAttribute("disabled")).toBe(
+      true,
+    );
+    fireEvent.doubleClick(card);
+    expect(useFactoryStore.getState().project.nodes).toHaveLength(0);
+  });
+
   it("keeps filled-cell recipe slots renderable when browsing by equivalent fluid", () => {
     const recipe: Recipe = {
       id: "fluid-canner-empty-oxygen-cell",

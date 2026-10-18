@@ -22,8 +22,7 @@ const LINK_MAX = 8000;
 /** GitHub refuses an issue body over 65,536 characters; the plans move to a comment past this. */
 const BODY_MAX = 60_000;
 
-/** Where reports go and how each kind is labelled there. */
-export const FEEDBACK_REPO = "jackwrichards/gtnh-planner-mod";
+/** Labels used when a report destination is configured. */
 export const FROM_GAME_LABEL = "from game";
 const KIND_LABELS = { bug: "bug", idea: "enhancement", help: "question" } as const;
 const KIND_TITLES = { bug: "Bug", idea: "Idea", help: "Help" } as const;
@@ -138,7 +137,7 @@ export function issueBody(report: FeedbackReport, links: FeedbackLinks): { body:
     "",
     "---",
     quiet(
-      [v.mod && `GTNH Planner ${v.mod}`, v.pack && `GTNH ${v.pack}`, v.java && `Java ${v.java}`, v.os]
+      [v.mod && `Planner ${v.mod}`, v.pack && `Pack ${v.pack}`, v.java && `Java ${v.java}`, v.os]
         .filter(Boolean)
         .join(" · "),
     ),
@@ -207,7 +206,7 @@ export async function openIssue(
     Accept: "application/vnd.github+json",
     "X-GitHub-Api-Version": "2022-11-28",
     "Content-Type": "application/json",
-    "User-Agent": "gtnhplanner-feedback",
+    "User-Agent": "monifactory-planner-feedback",
   };
   const response = await fetchImpl(`https://api.github.com/repos/${repo}/issues`, {
     method: "POST",

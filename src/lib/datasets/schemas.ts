@@ -2,11 +2,26 @@ import { z } from "zod";
 import { dominantColorSchema, recipeSchema, resourceIconAtlasRefSchema } from "../model/schemas";
 
 export const datasetSourceInfoSchema = z.object({
-  sourceId: z.enum(["nesql", "recex", "nerd", "gtnh-oracle", "unknown"]),
+  sourceId: z.enum([
+    "nesql",
+    "recex",
+    "nerd",
+    "gtnh-oracle",
+    "gtm-exporter",
+    "kubejs-exporter",
+    "unknown",
+  ]),
   sourceVersion: z.string().optional(),
   generatedAt: z.string(),
   gitCommit: z.string().optional(),
   notes: z.string().optional(),
+});
+
+export const datasetPackSchema = z.object({
+  id: z.string().regex(/^[a-z0-9][a-z0-9-]*$/),
+  name: z.string().min(1),
+  version: z.string().min(1),
+  mode: z.string().min(1).optional(),
 });
 
 export const datasetResourceSchema = z.object({
@@ -78,34 +93,44 @@ export const machineHandlerIconEntrySchema = z.object({
     .optional(),
 });
 
-export const recipeDatasetSchema = z.object({
-  schemaVersion: z.literal(1),
-  datasetVersionId: z.string().min(1),
-  gtnhVersion: z.string().min(1),
-  sourceInfo: datasetSourceInfoSchema,
-  resources: z.array(datasetResourceSchema).default([]),
-  resourceIndex: z.array(datasetResourceIndexEntrySchema).optional(),
-  recipes: z.array(recipeSchema),
-  oreDictionary: z.record(z.string(), z.array(z.string())),
-  recipeMaps: z.array(z.string()),
-  recipeMapIcons: z.array(recipeMapIconEntrySchema).optional(),
-  machineHandlerIcons: z.array(machineHandlerIconEntrySchema).optional(),
-  generatedAt: z.string(),
-});
+export const recipeDatasetSchema = z
+  .object({
+    schemaVersion: z.literal(1),
+    datasetVersionId: z.string().min(1),
+    pack: datasetPackSchema.optional(),
+    gtnhVersion: z.string().min(1).optional(),
+    sourceInfo: datasetSourceInfoSchema,
+    resources: z.array(datasetResourceSchema).default([]),
+    resourceIndex: z.array(datasetResourceIndexEntrySchema).optional(),
+    recipes: z.array(recipeSchema),
+    oreDictionary: z.record(z.string(), z.array(z.string())),
+    recipeMaps: z.array(z.string()),
+    recipeMapIcons: z.array(recipeMapIconEntrySchema).optional(),
+    machineHandlerIcons: z.array(machineHandlerIconEntrySchema).optional(),
+    generatedAt: z.string(),
+  })
+  .refine((dataset) => dataset.pack || dataset.gtnhVersion, {
+    message: "A dataset needs pack metadata or a legacy GTNH version.",
+  });
 
-export const datasetVersionSchema = z.object({
-  id: z.string().min(1),
-  gtnhVersion: z.string().min(1),
-  channel: z.enum(["stable", "daily", "experimental"]),
-  publishedAt: z.string(),
-  manifestPath: z.string(),
-  recipeDatasetPath: z.string(),
-  resourceIndexPath: z.string().optional(),
-  recipeIndexPath: z.string().optional(),
-  recipeLookupIndexPath: z.string().optional(),
-  checksumSha256: z.string().optional(),
-  sourceInfo: datasetSourceInfoSchema,
-});
+export const datasetVersionSchema = z
+  .object({
+    id: z.string().min(1),
+    pack: datasetPackSchema.optional(),
+    gtnhVersion: z.string().min(1).optional(),
+    channel: z.enum(["stable", "daily", "experimental"]),
+    publishedAt: z.string(),
+    manifestPath: z.string(),
+    recipeDatasetPath: z.string(),
+    resourceIndexPath: z.string().optional(),
+    recipeIndexPath: z.string().optional(),
+    recipeLookupIndexPath: z.string().optional(),
+    checksumSha256: z.string().optional(),
+    sourceInfo: datasetSourceInfoSchema,
+  })
+  .refine((version) => version.pack || version.gtnhVersion, {
+    message: "A dataset version needs pack metadata or a legacy GTNH version.",
+  });
 
 export const datasetManifestSchema = z.object({
   schemaVersion: z.literal(1),

@@ -7,14 +7,14 @@ export function createEmptyProject(): FactoryProject {
   return {
     schemaVersion: PROJECT_SCHEMA_VERSION,
     id: "manual-project",
-    name: "GTNH Planner",
+    name: "Monifactory Planner",
     recipes: [],
     nodes: [],
     storages: [],
     edges: [],
     fuelProfiles: gtnhFuelProfiles,
     selectedFuelProfileId: DEFAULT_FUEL_PROFILE_ID,
-    notes: "Dataset-backed plan. Recipes must come from a normalized GTNH dataset.",
+    notes: "Dataset-backed plan. Recipes must come from a normalized Monifactory dataset.",
     metadata: {
       createdAt: now,
       updatedAt: now,

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { PROJECT_SCHEMA_VERSION } from "@/lib/model/types";
 
 vi.mock("@/lib/server/community", () => ({
@@ -17,7 +17,7 @@ vi.mock("@/lib/server/feedback", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/lib/server/feedback")>();
   return {
     ...actual,
-    openIssue: vi.fn(async () => ({ number: 12, url: "https://github.com/jackwrichards/gtnh-planner-mod/issues/12" })),
+    openIssue: vi.fn(async () => ({ number: 12, url: "https://github.com/example/monifactory-planner/issues/12" })),
   };
 });
 
@@ -50,6 +50,11 @@ const report = {
   plans: [{ name: "Steel line", plan }],
 };
 
+beforeEach(() => {
+  vi.stubEnv("GITHUB_FEEDBACK_REPO", "example/monifactory-planner");
+  vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://planner.example");
+});
+
 afterEach(() => {
   vi.unstubAllEnvs();
 });
@@ -62,21 +67,30 @@ describe("the feedback route", () => {
     expect(await response.json()).toEqual({ error: "Reports can't be sent yet." });
   });
 
+  it("is closed without this fork's report destination", async () => {
+    vi.stubEnv("GITHUB_FEEDBACK_TOKEN", "token");
+    vi.stubEnv("GITHUB_FEEDBACK_REPO", "");
+    expect((await send(report)).status).toBe(503);
+    vi.stubEnv("GITHUB_FEEDBACK_REPO", "example/monifactory-planner");
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "");
+    expect((await send(report)).status).toBe(503);
+  });
+
   it("opens an issue with the plan linked and answers its page", async () => {
     vi.stubEnv("GITHUB_FEEDBACK_TOKEN", "token");
     const response = await send(report);
     expect(response.status).toBe(201);
     expect(await response.json()).toEqual({
       number: 12,
-      url: "https://github.com/jackwrichards/gtnh-planner-mod/issues/12",
+      url: "https://github.com/example/monifactory-planner/issues/12",
     });
     const [token, repo, issue] = vi.mocked(openIssue).mock.calls[0]!;
     expect(token).toBe("token");
-    expect(repo).toBe("jackwrichards/gtnh-planner-mod");
+    expect(repo).toBe("example/monifactory-planner");
     expect(issue.title).toBe("Idea: Copy a card");
     expect(issue.labels).toEqual(["from game", "enhancement"]);
-    expect(issue.body).toContain("[open in the planner](https://gtnhplanner.com/#p=gtnh1.");
-    expect(issue.body).toMatch(/\[plan file\]\(https:\/\/gtnhplanner\.com\/api\/feedback\/files\/[0-9a-f-]{36}\/plan-1\.json\)/);
+    expect(issue.body).toContain("[open in the planner](https://planner.example/#p=gtnh1.");
+    expect(issue.body).toMatch(/\[plan file\]\(https:\/\/planner\.example\/api\/feedback\/files\/[0-9a-f-]{36}\/plan-1\.json\)/);
   });
 
   it("refuses a bad report and a busy player", async () => {

@@ -9,16 +9,15 @@ body:
         Thanks for reporting this. The more of the below you fill in, the
         faster it can be fixed. If you are unsure about a field, skip it.
 
-        Machine rates are still being worked on. Multiblocks have a lot of
-        edge cases, and reports like yours are how the wrong ones get found,
-        so send it even if you are not certain.
+        Monifactory machine rates are still being worked on. Please include the
+        recipe and expected rate when reporting a calculation issue.
 
   - type: input
     id: version
     attributes:
       label: Planner version
-      description: The `v` chip in the top left of the planner. It should already be filled in if you came from the bug button.
-      placeholder: "1.22.0"
+      description: The `v` chip in the top left of the planner.
+      placeholder: "0.1.0"
     validations:
       required: true
 
@@ -26,10 +25,9 @@ body:
     id: pack
     attributes:
       label: Which pack version were you planning against?
-      description: The picker next to the planner version in the header.
+      description: The dataset version shown by the planner.
       options:
-        - Stable
-        - Daily
+        - Monifactory 0.13.7 Normal
         - Not sure
     validations:
       required: false
@@ -40,7 +38,7 @@ body:
       label: What happened?
       description: What went wrong, and what did you expect instead?
       placeholder: |
-        I dragged a wire from the Coke Oven output to a drawer and the wire
+        I dragged a wire from a machine output to a drawer and the wire
         vanished. I expected it to connect.
     validations:
       required: true
@@ -52,8 +50,8 @@ body:
       description: The steps someone else would follow to see the same thing.
       placeholder: |
         1. Open a fresh board
-        2. Add a Coke Oven from the recipe book
-        3. Drag from the Creosote output slot
+        2. Add a machine from the recipe browser
+        3. Drag from its output slot
         4. Drop on empty board
     validations:
       required: true
@@ -65,7 +63,7 @@ body:
       description: |
         The fastest way for someone to see exactly what you see. Publish your
         setup or pocket from the sidebar, then paste the link here.
-      placeholder: "https://gtnhplanner.com/?plan=..."
+      placeholder: "Paste a shared plan link if available"
     validations:
       required: false
 

@@ -275,7 +275,8 @@ export interface Recipe {
     datasetVersionId?: string;
     recipeMap?: string;
     sourceMod?: string;
-    exporter?: "nesql" | "recex" | "nerd" | "gtnh-oracle" | "unknown";
+    exporter?:
+      "nesql" | "recex" | "nerd" | "gtnh-oracle" | "gtm-exporter" | "kubejs-exporter" | "unknown";
     rawRecipeId?: string;
     sourceIdentifier?: string;
   };
@@ -491,15 +492,7 @@ export type FactoryAnnotationBorderStyle = "solid" | "dashed" | "none";
  * here means a tint surface wearing that mark.
  */
 export type FactoryAnnotationFillStyle =
-  | "tint"
-  | "solid"
-  | "none"
-  | "paper"
-  | "dots"
-  | "grid"
-  | "graph"
-  | "ruled"
-  | "hatch";
+  "tint" | "solid" | "none" | "paper" | "dots" | "grid" | "graph" | "ruled" | "hatch";
 
 /** The marks a box/zone draws over its surface: the board's own vocabulary. */
 export type FactoryAnnotationMarks = "none" | "dots" | "grid" | "graph" | "ruled" | "hatch";

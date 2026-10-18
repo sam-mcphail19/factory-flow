@@ -38,19 +38,18 @@ async function topPlans(base: string): Promise<string[]> {
 }
 
 export async function GET() {
-  const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://gtnhplanner.com";
+  const base = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
   const plans = await topPlans(base);
 
   const lines = [
-    "# GTNH Planner",
+    "# Monifactory Planner",
     "",
-    "> Free browser-based factory planner and recipe calculator for GregTech: New Horizons (GTNH), the Minecraft expert modpack. Draw production chains on an interactive flowchart, balance machine ratios, compute EU/t power draw and throughput, and share plans with the community. No account and no install needed.",
+    "> Browser-based recipe browser and production-chain planner for Monifactory. Draw factory layouts on an interactive flowchart.",
     "",
     "Key facts:",
     "",
-    "- Carries full recipe data for GTNH 2.9, exported from the game itself (NEI/RecEx), including multiblock machines, ore dictionary alternatives, and programmed circuit settings.",
-    "- Models GregTech mechanics faithfully: voltage tiers and overclocking, parallel processing on multiblocks, heat bonuses on the Electric Blast Furnace family, machine-specific speed and power coefficients.",
-    "- A solver computes steady-state flow for the whole factory at once: what every machine produces and consumes per second, where the bottleneck is, and how full each machine runs.",
+    "- Includes recipes exported from Monifactory 0.13.7 Normal mode. Some recipes have unknown processing rates.",
+    "- Machine counts and power calculations are still being adapted for Monifactory.",
     "- Plans export as shareable links, JSON, PNG, or GIF. Opening a shared link loads the full plan, editable, with nothing to sign up for.",
     "- The planner is a client-side application. Pages carry little static HTML; a plan link's name and summary are server-rendered into its page metadata, so fetching a plan URL is the way to read a plan.",
     `- Version ${APP_VERSION} as of this file; ${base}/api/version reports what is live.`,

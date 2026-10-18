@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "versions": [
+    {
+      "id": "monifactory-normal-0.13.7",
+      "pack": {
+        "id": "monifactory",
+        "name": "Monifactory",
+        "version": "0.13.7",
+        "mode": "Normal"
+      },
+      "channel": "stable",
+      "publishedAt": "2026-10-16T18:51:30.456Z",
+      "manifestPath": "/datasets/factory/datasets.manifest.json",
+      "recipeDatasetPath": "/datasets/monifactory/monifactory-normal-0.13.7/recipes.json.gz",
+      "resourceIndexPath": "/datasets/monifactory/monifactory-normal-0.13.7/resource-index.json.gz",
+      "recipeIndexPath": "/datasets/monifactory/monifactory-normal-0.13.7/recipe-index.json.gz",
+      "recipeLookupIndexPath": "/datasets/monifactory/monifactory-normal-0.13.7/recipe-lookup-index.json.gz",
+      "sourceInfo": {
+        "sourceId": "kubejs-exporter",
+        "generatedAt": "2026-10-16T18:51:30.456Z"
+      }
+    }
+  ],
+  "latestStableVersion": "monifactory-normal-0.13.7"
+}

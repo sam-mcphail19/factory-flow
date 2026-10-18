@@ -211,4 +211,31 @@ describe("factory JSON import/export", () => {
     expect(manifest.latestStableVersion).toBe("gtnh-2.7.4");
     expect(manifest.versions[0]?.recipeDatasetPath).toBe("/datasets/gtnh/2.7.4/recipes.json");
   });
+
+  it("accepts a non-GTNH pack and preserves its mode", () => {
+    const manifest = parseDatasetManifestJson(
+      JSON.stringify({
+        schemaVersion: 1,
+        versions: [
+          {
+            id: "monifactory-normal-1.2",
+            pack: { id: "monifactory", name: "Monifactory", version: "1.2", mode: "Normal" },
+            channel: "stable",
+            publishedAt: "2026-10-15T00:00:00.000Z",
+            manifestPath: "/datasets/factory/datasets.manifest.json",
+            recipeDatasetPath: "/datasets/monifactory/normal-1.2/recipes.json.gz",
+            sourceInfo: { sourceId: "gtm-exporter", generatedAt: "2026-10-15T00:00:00.000Z" },
+          },
+        ],
+      }),
+    );
+
+    expect(manifest.versions[0]?.pack).toEqual({
+      id: "monifactory",
+      name: "Monifactory",
+      version: "1.2",
+      mode: "Normal",
+    });
+    expect(manifest.versions[0]?.gtnhVersion).toBeUndefined();
+  });
 });

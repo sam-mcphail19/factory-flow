@@ -2,7 +2,8 @@ import { parseDatasetManifestJson } from "../import-export";
 import type { DatasetManifest, DatasetVersion } from "./types";
 
 export const DEFAULT_DATASET_MANIFEST_URL =
-  process.env.NEXT_PUBLIC_GTNH_DATASET_MANIFEST_URL ?? "/datasets/gtnh/datasets.manifest.json";
+  process.env.NEXT_PUBLIC_FACTORY_DATASET_MANIFEST_URL ??
+  "/datasets/factory/datasets.manifest.json";
 
 export async function fetchDatasetManifest(
   manifestUrl = DEFAULT_DATASET_MANIFEST_URL,

@@ -1,1 +1,0 @@
-The GTNH Planner board: a Benzene setup drawn as a flowchart, with the item list on the left and the plan totals on the right

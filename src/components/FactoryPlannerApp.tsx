@@ -13,9 +13,7 @@ import {
   fetchDatasetManifest,
   pickDefaultDatasetVersion,
 } from "@/lib/datasets";
-import {
-  initRecipeDatasetVersion,
-} from "@/lib/datasets/browser-loader";
+import { initRecipeDatasetVersion } from "@/lib/datasets/browser-loader";
 import { loadResourceHistory, useFactoryStore } from "@/store/factory-store";
 import { useCommunityAuthStore } from "@/store/community-auth-store";
 import { useDesignStore } from "@/store/design-store";
@@ -24,7 +22,11 @@ import { useWorkspaceView, writeWorkspaceView } from "@/lib/workspace-view";
 import { openCommunityPost } from "@/lib/community/open-post";
 import { openPlanCodeFromAddress } from "@/lib/open-plan-code";
 import { retryPendingPostFollows } from "@/lib/community/post-follow";
-import { forgetSharedPlanId, readSharedPlanId, syncSharedPlanAddress } from "@/lib/community/shared-link";
+import {
+  forgetSharedPlanId,
+  readSharedPlanId,
+  syncSharedPlanAddress,
+} from "@/lib/community/shared-link";
 import { useIsCompactViewport } from "@/lib/compact-view";
 import { startLibrarySync } from "@/lib/library/library-sync";
 import { startDesignTabSync } from "@/store/design-store";
@@ -39,7 +41,6 @@ import { PublicViewBar } from "./community/PublicViewBar";
 import { ViewOnlyNotice } from "./community/ViewOnlyNotice";
 import { TabConflictNotice } from "./TabConflictNotice";
 import { BlueprintSaveDialog } from "./BlueprintSaveDialog";
-import { PowerSourceOverlay } from "./PowerSourceOverlay";
 import { FactoryFlow } from "./flow/FactoryFlow";
 import { useBoardSoundEffects } from "./flow/use-board-sound-effects";
 import { InspectorPanel } from "./InspectorPanel";
@@ -70,6 +71,9 @@ export function FactoryPlannerApp() {
   const datasetVersionId = useFactoryStore((state) => state.dataset?.datasetVersionId);
   const datasetManifest = useFactoryStore((state) => state.datasetManifest);
   const datasetManifestUrl = useFactoryStore((state) => state.datasetManifestUrl);
+  const selectedPack = datasetManifest?.versions.find(
+    (entry) => entry.id === datasetVersionId,
+  )?.pack;
   useEffect(() => {
     if (!datasetVersionId) {
       return;
@@ -87,7 +91,12 @@ export function FactoryPlannerApp() {
     if (pending.length === 0) {
       return;
     }
-    noteRecipesRequested(pending, version.id, checkedRecipesRef.current, requestedRecipesRef.current);
+    noteRecipesRequested(
+      pending,
+      version.id,
+      checkedRecipesRef.current,
+      requestedRecipesRef.current,
+    );
     let cancelled = false;
     void resolveProjectRecipes(
       datasetManifestUrl ?? DEFAULT_DATASET_MANIFEST_URL,
@@ -102,7 +111,13 @@ export function FactoryPlannerApp() {
     return () => {
       cancelled = true;
     };
-  }, [datasetManifest, datasetManifestUrl, datasetVersionId, project.recipes, refreshProjectRecipes]);
+  }, [
+    datasetManifest,
+    datasetManifestUrl,
+    datasetVersionId,
+    project.recipes,
+    refreshProjectRecipes,
+  ]);
   useBoardSoundEffects();
   const skipInitialSaveRef = useRef(true);
   const saveTimeoutRef = useRef<number | undefined>(undefined);
@@ -125,7 +140,11 @@ export function FactoryPlannerApp() {
         setDataset(dataset);
         const projectRecipes = useFactoryStore.getState().project.recipes;
         if (projectRecipes.length > 0) {
-          const { refreshed, migration } = await resolveProjectRecipes(manifestUrl, version, projectRecipes);
+          const { refreshed, migration } = await resolveProjectRecipes(
+            manifestUrl,
+            version,
+            projectRecipes,
+          );
           const checked = new Map<string, boolean>();
           noteRecipesRequested(projectRecipes, version.id, checked, requestedRecipesRef.current);
           noteRecipesRefreshed(refreshed, version.id, checked);
@@ -156,8 +175,10 @@ export function FactoryPlannerApp() {
                 // Release the arrival guard, then set the address explicitly:
                 // React may already have run the viewer's address effect.
                 forgetSharedPlanId();
-                syncSharedPlanAddress(useDesignStore.getState().publicView?.id
-                  ?? useFactoryStore.getState().project.metadata?.communityPlanId);
+                syncSharedPlanAddress(
+                  useDesignStore.getState().publicView?.id ??
+                    useFactoryStore.getState().project.metadata?.communityPlanId,
+                );
               }
             }
           } catch (error) {
@@ -299,14 +320,17 @@ export function FactoryPlannerApp() {
       <PlacementRevealer />
       <SharedAddressSync />
       <AppHeader onLoadDatasetVersion={loadDatasetVersion} />
+      {selectedPack && selectedPack.id !== "gtnh" ? (
+        <div className="border-b border-line-strong bg-surface-sunken px-3 py-1 text-center text-xs text-fg-muted">
+          {selectedPack.name} recipes are available for browsing and layout. Machine counts and
+          power estimates are still being adapted for this pack.
+        </div>
+      ) : null}
       {isCompact ? (
         <CompactWorkspace workspace={workspace} onLoadDatasetVersion={loadDatasetVersion} />
       ) : (
         <ColumnWorkspace workspace={workspace} onLoadDatasetVersion={loadDatasetVersion} />
       )}
-      {/* The power source picker portals to the body, so it works from either
-          layout and outranks the drawers on compact. */}
-      <PowerSourceOverlay />
       {/* Every pocket-to-shelf path (card save, share-a-pocket,
           overwrite) confirms through this one dialog. */}
       <BlueprintSaveDialog />
@@ -369,7 +393,11 @@ function BoardColumn() {
   return (
     <div className="grid h-full min-h-0 min-w-0 grid-rows-[auto_minmax(0,1fr)]">
       <div className="min-w-0">
-        {covering ? null : publicView ? <PublicViewBar key={publicView.id} /> : <PlanIdentityDrawer />}
+        {covering ? null : publicView ? (
+          <PublicViewBar key={publicView.id} />
+        ) : (
+          <PlanIdentityDrawer />
+        )}
         {covering ? null : <TabConflictNotice />}
       </div>
       {/*
@@ -401,7 +429,9 @@ function useCoveringPage(): "welcome" | "shelf" | undefined {
   const welcome = useWelcomeTab();
   const shelf = useLibraryTab();
   const isHydrated = useDesignStore((state) => state.isHydrated);
-  const hasActiveDesign = useDesignStore((state) => state.activeDesignId !== undefined || state.publicView !== undefined);
+  const hasActiveDesign = useDesignStore(
+    (state) => state.activeDesignId !== undefined || state.publicView !== undefined,
+  );
   if (welcome.active) {
     return "welcome";
   }
@@ -428,19 +458,20 @@ function ColumnWorkspace({ workspace, onLoadDatasetVersion }: WorkspaceProps) {
           and the board never has to give the width back to a hover target. */}
       <main
         className="grid min-h-0 flex-1 grid-cols-1 overflow-hidden"
-        style={{
-          // Keep the toolbar's fit budget stable when Pool hides this column.
-          "--toolbar-hidden-panel-width": worksheet && !covering
-            ? `${workspace.rightPanelOpen ? 234 : RAIL_WIDTH}px`
-            : "0px",
-          gridTemplateColumns: [
-            workspace.leftPanelOpen ? "256px" : `${RAIL_WIDTH}px`,
-            "minmax(0,1fr)",
-            // With a page over the board the resource column is not folded, it is
-            // GONE: nothing to open, no rail to hint that there is.
-            rightPanelShown ? "234px" : covering || worksheet ? "0px" : `${RAIL_WIDTH}px`,
-          ].join(" "),
-        } as CSSProperties}
+        style={
+          {
+            // Keep the toolbar's fit budget stable when Pool hides this column.
+            "--toolbar-hidden-panel-width":
+              worksheet && !covering ? `${workspace.rightPanelOpen ? 234 : RAIL_WIDTH}px` : "0px",
+            gridTemplateColumns: [
+              workspace.leftPanelOpen ? "256px" : `${RAIL_WIDTH}px`,
+              "minmax(0,1fr)",
+              // With a page over the board the resource column is not folded, it is
+              // GONE: nothing to open, no rail to hint that there is.
+              rightPanelShown ? "234px" : covering || worksheet ? "0px" : `${RAIL_WIDTH}px`,
+            ].join(" "),
+          } as CSSProperties
+        }
       >
         {/* Each column carries its own same-height header row. The browser
             owns its header, so it stays a direct grid item with no wrapper. */}
@@ -566,11 +597,17 @@ function scheduleIdleWork(callback: () => void, timeout: number) {
   return () => globalThis.clearTimeout(timeoutId);
 }
 
-function ViewerAwareBrowser({ onLoadDatasetVersion }: Pick<WorkspaceProps, "onLoadDatasetVersion">) {
-  const readOnly = useFactoryStore(state => state.isReadOnly);
+function ViewerAwareBrowser({
+  onLoadDatasetVersion,
+}: Pick<WorkspaceProps, "onLoadDatasetVersion">) {
+  const readOnly = useFactoryStore((state) => state.isReadOnly);
   if (!readOnly) return <RecipeBrowser onLoadDatasetVersion={onLoadDatasetVersion} />;
-  return <div className="relative h-full min-h-0 overflow-hidden">
-    <div inert className="h-full opacity-30 grayscale"><RecipeBrowser onLoadDatasetVersion={onLoadDatasetVersion} /></div>
-    <ViewOnlyNotice />
-  </div>;
+  return (
+    <div className="relative h-full min-h-0 overflow-hidden">
+      <div inert className="h-full opacity-30 grayscale">
+        <RecipeBrowser onLoadDatasetVersion={onLoadDatasetVersion} />
+      </div>
+      <ViewOnlyNotice />
+    </div>
+  );
 }

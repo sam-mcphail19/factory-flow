@@ -41,7 +41,7 @@ import { findDeathSpirals } from "./death-spiral";
 
 /** Kept as short lines: one long paragraph wraps into mush in a chat window. */
 const READ_ME = [
-  "GTNH Planner diagnostics.",
+  "Monifactory Planner diagnostics.",
   "Rates are per second, durations in seconds, power in EU/tick.",
   "Cards are referenced by handle: M = machine, D = drawer.",
   "A machine's in/out reads 'flowing now of what it would move at full speed'.",

@@ -1,14 +1,16 @@
-# GTNH Factory Flow
+# Monifactory Planner
 
-A production-chain planner for GregTech: New Horizons, live at
-[gtnhplanner.com](https://gtnhplanner.com).
+This fork adapts GTNH Factory Flow into a recipe browser and production-chain
+planner for Monifactory. The exporter and converter collect 69,221 recipes from
+a running Monifactory 0.13.7 Normal instance, including GTM, Ender IO,
+NuclearCraft, Thermal, Ad Astra, AE2, SysTeams, crafting, stonecutting, and
+cooking. Item tags resolve to the pack's actual members.
+Common GTM electric singleblocks use GTM's standard overclock rule. Other
+Monifactory machines still need validated profiles, so plans are currently for
+recipe browsing and layout. See [the dataset contract](docs/MULTIPACK.md).
 
-Search the real GTNH recipe set, place recipes as machine cards on a board, wire outputs
-to inputs, and the solver works out rates, machine counts, power, bottlenecks and
-surplus for the whole plan. Three modes hand the planner more of the work: **Build** (you
-set machines and counts), **Solve** (you set target rates, it counts machines) and
-**Pool** (it wires and imports too). Plans save in the browser, share as links, and can
-be posted to the community hub.
+Search recipes, place machine cards on a board, and connect outputs to inputs.
+Plans save in the browser and can be exported as JSON or images.
 
 ## Run
 
@@ -19,21 +21,16 @@ npm run typecheck
 npm run test
 ```
 
-The app needs a recipe dataset. Either proxy the live one:
-
-```bash
-GTNH_DATASET_BACKEND_URL=https://gtnhplanner.com npm run dev
-```
-
-or place a dataset and its `datasets.manifest.json` under `public/datasets/gtnh/`
-(ignored by git). Community features
-need Supabase; see [docs/COMMUNITY.md](docs/COMMUNITY.md).
+The repository includes the Monifactory 0.13.7 Normal dataset and
+`public/datasets/factory/datasets.manifest.json`, so the app is ready after installation.
+Follow [the exporter instructions](tools/monifactory/README.md) to rebuild it for a new pack version.
+Community features need Supabase; see [docs/COMMUNITY.md](docs/COMMUNITY.md).
 
 ## How it fits together
 
-- `tools/dataset-pipeline/`: a Forge mod runs inside a real GTNH client and exports every
-  recipe, NEI layout, machine and rendered icon; Node scripts normalize it into the
-  dataset the app reads. Recipe data never comes from wikis or hand-written tables.
+- `tools/monifactory/`: exporters and converters collect recipes and item icons
+  from a running Monifactory instance and build the local dataset.
+- `tools/dataset-pipeline/`: shared dataset indexing and the original GTNH pipeline.
 - `src/lib/`: the domain model, machine math (overclocks, parallels, curated per-machine
   behaviour checked against the mod source) and an LP-based solver.
 - `src/components/`, `src/store/`: the Next.js + React Flow UI and Zustand stores.
@@ -43,10 +40,12 @@ Working notes for contributors and AI agents are in [AGENTS.md](AGENTS.md) and t
 
 ## License and credits
 
-Code is MIT licensed. GTNH, Minecraft, mod assets, generated datasets and icons are not
-included and remain under their owners' licenses.
+Code is MIT licensed. The included recipe dataset and item icon sheets come from
+Monifactory and its mods; game and mod assets remain under their owners' licenses.
 
-This project started as a fork of
+This fork retains the MIT license and copyright from
+[jackwrichards/gtnh-factory-flow](https://github.com/jackwrichards/gtnh-factory-flow).
+That project started as a fork of
 [Samiracle64/gtnh-factory-flow](https://github.com/Samiracle64/gtnh-factory-flow) and has
 since diverged into an independent codebase. The original work is MIT licensed and its
 copyright is retained in `LICENSE`.

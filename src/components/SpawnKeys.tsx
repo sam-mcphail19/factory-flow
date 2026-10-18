@@ -1,20 +1,17 @@
 "use client";
 
-import { Gauge, Sprout, Zap } from "lucide-react";
+import { Gauge } from "lucide-react";
 import type { ReactNode } from "react";
 import { useFactoryStore } from "@/store/factory-store";
 
 /**
- * Spawners for the three non-recipe cards, at the top of the items column: a
- * generator (the power catalog), a custom rate node and a crop farm. Styled
+ * The custom rate card at the top of the items column. Styled
  * quietly like the column's own keys (no plate, uncoloured icons). `leading`
  * is the column's fold-away key, placed at the row's start.
  */
 export function SpawnKeys({ leading }: { leading?: ReactNode }) {
   const isReadOnly = useFactoryStore((state) => state.isReadOnly);
-  const openPowerMenu = useFactoryStore((state) => state.openPowerMenu);
   const addCustomRateNode = useFactoryStore((state) => state.addCustomRateNode);
-  const addCropFarmNode = useFactoryStore((state) => state.addCropFarmNode);
   // The columns' own hide keys' dress (the right column's "Hide" key): no
   // ground of their own, the column's border, a plain lift on hover - keys that act,
   // a step apart from the filter chips under them, which only narrow.
@@ -26,16 +23,6 @@ export function SpawnKeys({ leading }: { leading?: ReactNode }) {
       {leading}
       <button
         type="button"
-        onClick={openPowerMenu}
-        className={key}
-        title="Place a generator"
-        aria-label="Place a generator"
-      >
-        <Zap className="h-3 w-3 shrink-0" />
-        Power
-      </button>
-      <button
-        type="button"
         onClick={addCustomRateNode}
         className={key}
         title="Add custom rate node"
@@ -43,16 +30,6 @@ export function SpawnKeys({ leading }: { leading?: ReactNode }) {
       >
         <Gauge className="h-3 w-3 shrink-0" />
         Custom
-      </button>
-      <button
-        type="button"
-        onClick={addCropFarmNode}
-        className={key}
-        title="Add crop farm"
-        aria-label="Add crop farm"
-      >
-        <Sprout className="h-3 w-3 shrink-0" />
-        Farm
       </button>
     </div>
   );

@@ -85,7 +85,7 @@ describe("feedback reports from the game", () => {
     expect(body).toContain("<summary>The end of the game log</summary>");
     expect(body).not.toContain("line ~~~~ end");
     expect(body).toContain("<summary>The crash report</summary>");
-    expect(body).toContain("GTNH Planner 0.2.0-alpha.2 · GTNH 2.9.0-RC-2 · Java 21 · Windows 11");
+    expect(body).toContain("Planner 0.2.0-alpha.2 · Pack 2.9.0-RC-2 · Java 21 · Windows 11");
   });
 
   it("shows the player's words as text: no pictures, links or HTML", () => {

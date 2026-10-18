@@ -15,6 +15,10 @@ if (!datasetPath || !datasetOutDir) {
 // made each miss a 55MB parse that blocked every other request for seconds.
 // Compression barely cares (recipes share vocabulary within 250 fine).
 const shardSize = positiveIntEnv("GTNH_RECIPE_SHARD_SIZE", 250);
+const publicBase = (process.env.FACTORY_DATASET_PUBLIC_BASE ?? "/datasets/gtnh").replace(/\/$/, "");
+if (!/^\/datasets\/[a-z0-9/_-]+$/.test(publicBase)) {
+  throw new Error("FACTORY_DATASET_PUBLIC_BASE must be a /datasets/... path.");
+}
 const dataset = await readDataset(datasetPath);
 const versionId = dataset.datasetVersionId;
 const shardDir = path.join(datasetOutDir, "recipes-shards");
@@ -35,7 +39,7 @@ for (
 ) {
   const end = Math.min(dataset.recipes.length, start + shardSize);
   const fileName = `shard-${String(shardIndex).padStart(4, "0")}.json.gz`;
-  const publicPath = `/datasets/gtnh/${versionId}/recipes-shards/${fileName}`;
+  const publicPath = `${publicBase}/${versionId}/recipes-shards/${fileName}`;
   const shard = {
     schemaVersion: 1,
     datasetVersionId: versionId,
@@ -52,6 +56,7 @@ for (
 const recipeIndex = {
   schemaVersion: 1,
   datasetVersionId: versionId,
+  pack: dataset.pack,
   gtnhVersion: dataset.gtnhVersion,
   sourceInfo: dataset.sourceInfo,
   recipeMaps: dataset.recipeMaps ?? [],
@@ -69,6 +74,7 @@ const recipeLookupIndex = buildRecipeLookupIndex(dataset.recipes, recipeIndex, r
 const resourceCatalog = {
   schemaVersion: 1,
   datasetVersionId: versionId,
+  pack: dataset.pack,
   gtnhVersion: dataset.gtnhVersion,
   sourceInfo: dataset.sourceInfo,
   resources: dataset.resources ?? [],

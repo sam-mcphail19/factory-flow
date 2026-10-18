@@ -799,8 +799,7 @@ export function RecipeBrowser({ onLoadDatasetVersion }: RecipeBrowserProps) {
           // The wheel pages the list from anywhere in the column, including over
           // the controls and the recent shelf, since nothing here scrolls.
           <div className="flex min-h-0 flex-1 flex-col">
-        {/* Spawners for the non-recipe cards (generator, custom rate, crop
-            farm), above the search. */}
+        {/* The custom rate card sits above the search. */}
         <SpawnKeys
           leading={
             /* Folds this column away; on a phone it closes the drawer. */

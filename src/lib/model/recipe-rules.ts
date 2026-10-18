@@ -1,5 +1,13 @@
-import { CROP_FARM_PLACEHOLDER_RECIPE_ID, createCropFarmPlaceholderRecipe } from "./passive-production";
-import { getFusionMachine, getFusionRecipeMark, isFusionRecipe, normalizeFusionHandler } from "@/lib/machines/fusion";
+import {
+  CROP_FARM_PLACEHOLDER_RECIPE_ID,
+  createCropFarmPlaceholderRecipe,
+} from "./passive-production";
+import {
+  getFusionMachine,
+  getFusionRecipeMark,
+  isFusionRecipe,
+  normalizeFusionHandler,
+} from "@/lib/machines/fusion";
 import { TGS_MACHINE_TYPE, tgsEuPerTick } from "@/lib/machines/tree-growth-simulator";
 import type {
   FactoryNode,
@@ -37,7 +45,8 @@ export function expandMachineRecipeVariants(recipes: Recipe[]): Recipe[] {
 }
 
 export function getRecipeMachineHandlers(
-  recipe: Pick<Recipe, "machineType" | "minimumTier" | "source" | "machineHandlers"> & Partial<Recipe>,
+  recipe: Pick<Recipe, "machineType" | "minimumTier" | "source" | "machineHandlers"> &
+    Partial<Recipe>,
 ): MachineHandler[] {
   // Dataset handler lists are authoritative and always start with the map's
   // primary machine. Synthesizing an extra entry from the recipe map name
@@ -171,7 +180,8 @@ export function machineCycleTicks(machineType: string | undefined): number | und
 }
 
 export function getSelectedMachineHandler(
-  recipe: Pick<Recipe, "machineType" | "minimumTier" | "source" | "machineHandlers"> & Partial<Recipe>,
+  recipe: Pick<Recipe, "machineType" | "minimumTier" | "source" | "machineHandlers"> &
+    Partial<Recipe>,
   node: Pick<FactoryNode, "machineHandlerId">,
 ): MachineHandler {
   const handlers = getRecipeMachineHandlers(recipe);
@@ -191,6 +201,21 @@ export function applyMachineHandlerToRecipe(
   }
   const handlers = getRecipeMachineHandlers(recipe);
   const handler = handlers.find((entry) => entry.id === node.machineHandlerId) ?? handlers[0];
+  if (recipe.source?.datasetVersionId?.startsWith("monifactory-")) {
+    return {
+      ...recipe,
+      machineType: handler.machineType,
+      minimumTier: handler.minimumTier,
+      durationTicks: handler.durationTicks ?? recipe.durationTicks,
+      eut: handler.eut ?? recipe.eut,
+      machineProfile: {
+        ...recipe.machineProfile,
+        machineType: handler.machineType,
+        minimumTier: handler.minimumTier,
+        kind: handler.kind ?? "single",
+      },
+    };
+  }
   const machineConfigControls = handler.machineConfigControls ?? recipe.machineConfigControls;
   // Oracle runtime variants are computed in-game for the recipe map's
   // default machine; a different selected machine must fall back to the
@@ -204,10 +229,13 @@ export function applyMachineHandlerToRecipe(
   // the base recipe instead.
   const seedsFromBase = machineTableSeedsFromBase(handler.machineType);
   const minimumTier = getMachineBehaviour(handler.machineType)?.recipeTierFromBase
-    ? recipe.minimumTier : handler.minimumTier;
-  const handlerDurationTicks = machineCycleTicks(handler.machineType) ?? (seedsFromBase
-    ? steamSingleblockDurationTicks(recipe, handler)
-    : (handler.durationTicks ?? steamSingleblockDurationTicks(recipe, handler)));
+    ? recipe.minimumTier
+    : handler.minimumTier;
+  const handlerDurationTicks =
+    machineCycleTicks(handler.machineType) ??
+    (seedsFromBase
+      ? steamSingleblockDurationTicks(recipe, handler)
+      : (handler.durationTicks ?? steamSingleblockDurationTicks(recipe, handler)));
   const handlerEut = seedsFromBase ? undefined : handler.eut;
   // Steam machines burn steam, not EU. Their handlers carry no EU override,
   // so without this they would inherit the electric recipe's EU draw and the
@@ -216,7 +244,11 @@ export function applyMachineHandlerToRecipe(
   // The Tree Growth Simulator's NEI page says 0 EU/t, but the machine draws VP[t] and needs LV at least
   // (tree-growth-simulator.ts): its card offers voltage and power like any electric machine.
   const tgs = handler.machineType === TGS_MACHINE_TYPE;
-  const eut = tgs ? tgsEuPerTick(1) : isSteamMachineHandler(handler) ? 0 : (handlerEut ?? recipe.eut);
+  const eut = tgs
+    ? tgsEuPerTick(1)
+    : isSteamMachineHandler(handler)
+      ? 0
+      : (handlerEut ?? recipe.eut);
   return {
     ...recipe,
     runtimeCalculation,
@@ -257,15 +289,18 @@ export function getRecipeCoilTierControl(
   const control =
     getMachineTableControls(recipe.machineType).find((entry) => entry.id === "heatingCoil") ??
     findMachineConfigControl(recipe, "heatingCoil");
-  return control ? resolveMachineConfigTierControl(applyControlRecipeMinimum(control, recipe), node.coilTier) : undefined;
+  return control
+    ? resolveMachineConfigTierControl(applyControlRecipeMinimum(control, recipe), node.coilTier)
+    : undefined;
 }
 
 export function getRecipeMachineConfigTierControls(
   recipe: Pick<Recipe, "machineType" | "source" | "nei" | "machineConfigControls">,
   node: Pick<FactoryNode, "machineConfigTiers">,
 ): MachineConfigTierControl[] {
-  const settings = getMachineBehaviour(recipe.machineType)?.normalizeConfig?.(node.machineConfigTiers ?? {})
-    ?? node.machineConfigTiers;
+  const settings =
+    getMachineBehaviour(recipe.machineType)?.normalizeConfig?.(node.machineConfigTiers ?? {}) ??
+    node.machineConfigTiers;
   const controls = dropHiddenControls(
     mergeMachineConfigControls(
       recipe.machineConfigControls ?? [],
@@ -405,8 +440,16 @@ function resolveMachineConfigTierControl(
       label: String(value),
       resource: { ...minimum.resource, displayName: `${control.label}: ${value}` },
     };
-    return { id: control.id, label: control.label, numeric: control.numeric,
-      minimum, current, tiers: [current], minimumIndex: 0, resource: current.resource };
+    return {
+      id: control.id,
+      label: control.label,
+      numeric: control.numeric,
+      minimum,
+      current,
+      tiers: [current],
+      minimumIndex: 0,
+      resource: current.resource,
+    };
   }
 
   const minimumIndex = Math.max(

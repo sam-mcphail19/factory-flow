@@ -8,7 +8,6 @@ import { OPEN_SHARE_DIALOG_EVENT } from "@/lib/setups-tab";
 import { useIsCompactViewport } from "@/lib/compact-view";
 import { markNotesReadAndNotify, subscribeToNotesRead, unseenEntries } from "@/lib/whats-new";
 import { ChangelogDialog } from "./ChangelogDialog";
-import { ModAnnouncement } from "./ModAnnouncement";
 import { APP_VERSION } from "@/lib/version";
 import { AccountMenu } from "./community/AccountMenu";
 import { SharePlanDialog } from "./community/SharePlanDialog";
@@ -19,7 +18,7 @@ import { BoardActions } from "./BoardActions";
 import { ExportImageDialog } from "./export/ExportImageDialog";
 import { DevMenu } from "./DevMenu";
 import { SettingsDialog } from "./SettingsDialog";
-import { HeaderLinks, SupportButton } from "./HeaderLinks";
+import { WelcomeButton } from "./HeaderLinks";
 
 /**
  * The pack picker's switch. See the note where it renders; flip this back to
@@ -74,7 +73,7 @@ export function AppHeader({ onLoadDatasetVersion }: AppHeaderProps) {
     <header className="app-header relative flex h-[30px] shrink-0 items-center justify-between gap-3 border-b border-line bg-surface px-3 compact:h-auto compact:flex-wrap compact:gap-y-0">
       <h1 className="flex min-w-0 items-center gap-2 text-sm font-bold tracking-tight">
         <span className="shrink-0">
-          GTNH <span className="text-cyan-500">Planner</span>
+          Monifactory <span className="text-cyan-500">Planner</span>
         </span>
         {/* Release notes open only on request. Shift-click opens the dev menu. */}
         <button
@@ -121,8 +120,6 @@ export function AppHeader({ onLoadDatasetVersion }: AppHeaderProps) {
       {isChangelogOpen ? (
         <ChangelogDialog unseenVersions={unseenVersions} onClose={() => setChangelogOpen(false)} />
       ) : null}
-      {/* The one popup that opens by itself, once per browser. */}
-      <ModAnnouncement />
       {isDevMenuOpen ? <DevMenu onClose={() => setDevMenuOpen(false)} /> : null}
       {isShareOpen ? <SharePlanDialog onClose={() => setShareOpen(false)} /> : null}
       {isExportOpen ? <ExportImageDialog onClose={() => setExportOpen(false)} /> : null}
@@ -152,8 +149,7 @@ export function AppHeader({ onLoadDatasetVersion }: AppHeaderProps) {
           >
             <Settings className="h-3.5 w-3.5" />
           </button>
-          <SupportButton />
-          <HeaderLinks />
+          <WelcomeButton />
           {/* No What's new button: the version chip opens the notes and wears
               the unread dot. */}
           <AccountMenu />

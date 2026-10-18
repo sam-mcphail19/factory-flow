@@ -100,16 +100,15 @@ export function WelcomePage() {
           <header className="flex flex-col items-start gap-3">
             <div className="flex items-baseline gap-3">
               <h1 className="text-[32px] font-black leading-none tracking-tight text-white compact:text-[26px]">
-                <span className="text-cyan-300">GTNH</span> Planner
+                <span className="text-cyan-300">Monifactory</span> Planner
               </h1>
               <span className="rounded border border-line-strong px-1.5 py-0.5 text-[11px] text-fg-muted">
                 v{APP_VERSION}
               </span>
             </div>
             <p className="max-w-[600px] text-[13px] leading-relaxed text-fg-subtle">
-              Draw a GregTech: New Horizons factory as a flowchart. Every card is a
-              real recipe, every wire carries a real rate, and the board tells you
-              what starves, what clogs and what to build.
+              Explore Monifactory recipes and draw production chains as a flowchart.
+              Connect machines, trace ingredients, and plan what to build.
             </p>
             <div className="mt-1 flex flex-wrap gap-2">
               <PrimaryButton

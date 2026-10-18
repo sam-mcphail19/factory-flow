@@ -72,7 +72,7 @@ export function PastePlanDialog({ onClose }: { onClose: () => void }) {
           }}
           rows={5}
           spellCheck={false}
-          placeholder="https://gtnhplanner.com/#p=..."
+          placeholder="Paste a plan link or plan code"
           className="w-full resize-none break-all rounded border border-line-strong bg-surface-sunken px-2 py-1.5 font-mono text-xs"
         />
         {error ? <p className="text-sm text-red-400">{error}</p> : null}

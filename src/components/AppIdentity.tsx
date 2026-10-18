@@ -1,6 +1,7 @@
 "use client";
 
 import { listSelectableDatasetVersions } from "@/lib/datasets/remote";
+import { datasetVersionLabel } from "@/lib/datasets/pack";
 import { useFactoryStore } from "@/store/factory-store";
 
 interface AppIdentityProps {
@@ -18,10 +19,7 @@ export function AppIdentity({ onLoadDatasetVersion }: AppIdentityProps) {
   const versions = manifest ? listSelectableDatasetVersions(manifest) : [];
 
   return (
-    <label
-      className="flex min-w-0 items-center gap-1.5"
-      title="Pack version"
-    >
+    <label className="flex min-w-0 items-center gap-1.5" title="Pack version">
       <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-fg-muted">
         Game
       </span>
@@ -38,7 +36,7 @@ export function AppIdentity({ onLoadDatasetVersion }: AppIdentityProps) {
         {versions.length ? (
           versions.map((version) => (
             <option key={version.id} value={version.id}>
-              {version.gtnhVersion} ({version.channel})
+              {datasetVersionLabel(version)}
             </option>
           ))
         ) : (

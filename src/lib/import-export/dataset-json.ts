@@ -27,7 +27,7 @@ export function parseRecipeDatasetJson(source: string): RecipeDataset {
       const issues = error.issues
         .map((issue) => `${issue.path.join(".") || "root"}: ${issue.message}`)
         .join("; ");
-      throw new DatasetJsonError(`Invalid GTNH recipe dataset: ${issues}`);
+      throw new DatasetJsonError(`Invalid recipe dataset: ${issues}`);
     }
 
     throw error;
@@ -52,7 +52,7 @@ export function parseDatasetManifestJson(source: string): DatasetManifest {
       const issues = error.issues
         .map((issue) => `${issue.path.join(".") || "root"}: ${issue.message}`)
         .join("; ");
-      throw new DatasetJsonError(`Invalid GTNH dataset manifest: ${issues}`);
+      throw new DatasetJsonError(`Invalid dataset manifest: ${issues}`);
     }
 
     throw error;

@@ -13,15 +13,7 @@ import {
   X,
   Zap,
 } from "lucide-react";
-import {
-  memo,
-  useCallback,
-  useEffect,
-  useEffectEvent,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { memo, useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type {
   MouseEvent as ReactMouseEvent,
@@ -49,7 +41,11 @@ import { playBoardSound } from "@/lib/board-sounds";
 import { ENERGY_READING_TEXT } from "./flow/flow-explainers";
 import { GT_TIER_COLORS } from "./flow/tier-colors";
 import type { RecipeBrowserMachinePin, RecipeInputPicks, TierFilter } from "@/store/factory-store";
-import { machineIconAtTier, useMachineHandlerIconEntries, useRecipeMapIcons } from "./flow/machine-icons";
+import {
+  machineIconAtTier,
+  useMachineHandlerIconEntries,
+  useRecipeMapIcons,
+} from "./flow/machine-icons";
 import {
   applyAlternativeCycleFace,
   getAlternativeCycleFaces,
@@ -79,11 +75,10 @@ import { useFactoryStore } from "@/store/factory-store";
  * One condition on the stencil: a resource and the side of the recipe it must
  * appear on, dressed to draw its own chip.
  */
-export interface StencilClause
-  extends Pick<
-    ResourceAmount,
-    "kind" | "id" | "displayName" | "iconPath" | "iconAtlas" | "dominantColor"
-  > {
+export interface StencilClause extends Pick<
+  ResourceAmount,
+  "kind" | "id" | "displayName" | "iconPath" | "iconAtlas" | "dominantColor"
+> {
   role: RecipeQueryRole;
 }
 
@@ -289,8 +284,10 @@ export function RecipeSearchOverlay({
   const machineIconEntries = useMachineHandlerIconEntries();
   const recipeMapIcons = useRecipeMapIcons();
   const machinePinIcon = machinePin
-    ? (machineIconAtTier(machinePin.handlerId ? machineIconEntries.get(machinePin.handlerId) : undefined, machinePin.tier) ??
-      (machinePin.recipeMaps[0] ? recipeMapIcons.get(machinePin.recipeMaps[0]) : undefined))
+    ? (machineIconAtTier(
+        machinePin.handlerId ? machineIconEntries.get(machinePin.handlerId) : undefined,
+        machinePin.tier,
+      ) ?? (machinePin.recipeMaps[0] ? recipeMapIcons.get(machinePin.recipeMaps[0]) : undefined))
     : undefined;
   const panelRef = useRef<HTMLElement>(null);
   const layout = useRecipeSearchViewport();
@@ -381,7 +378,11 @@ export function RecipeSearchOverlay({
           event.target.isContentEditable);
       const backKey =
         (event.altKey && event.key === "ArrowLeft") ||
-        (event.key === "Backspace" && !inTextField && !event.altKey && !event.ctrlKey && !event.metaKey);
+        (event.key === "Backspace" &&
+          !inTextField &&
+          !event.altKey &&
+          !event.ctrlKey &&
+          !event.metaKey);
       const forwardKey = event.altKey && event.key === "ArrowRight";
       if (backKey || forwardKey) {
         const allowed = backKey ? canGoBack : canGoForward;
@@ -457,7 +458,8 @@ export function RecipeSearchOverlay({
   const addResourceClause = useCallback(
     (resource: ResourceAmount, role: RecipeQueryRole) => {
       const already = clauses.some(
-        (clause) => clause.role === role && clause.kind === resource.kind && clause.id === resource.id,
+        (clause) =>
+          clause.role === role && clause.kind === resource.kind && clause.id === resource.id,
       );
       if (!already) {
         playBoardSound("stencilAdd");
@@ -625,10 +627,7 @@ export function RecipeSearchOverlay({
           ) {
             overRole = role;
             const within = event.clientY - rect.top + element.scrollTop;
-            overSlot = Math.max(
-              0,
-              Math.min(layoutCount(role), Math.round(within / drag.pitch)),
-            );
+            overSlot = Math.max(0, Math.min(layoutCount(role), Math.round(within / drag.pitch)));
           }
         }
         return {
@@ -636,8 +635,7 @@ export function RecipeSearchOverlay({
           x: event.clientX,
           y: event.clientY,
           active:
-            drag.active ||
-            Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) > 4,
+            drag.active || Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) > 4,
           overRole,
           overSlot,
         };
@@ -669,7 +667,9 @@ export function RecipeSearchOverlay({
         const role = drag.overRole;
         const already = clauses.some(
           (clause) =>
-            clause.role === role && clause.kind === drag.source!.kind && clause.id === drag.source!.id,
+            clause.role === role &&
+            clause.kind === drag.source!.kind &&
+            clause.id === drag.source!.id,
         );
         if (already) {
           return;
@@ -701,9 +701,7 @@ export function RecipeSearchOverlay({
     // keying on the boolean keeps every move from re-wiring the window.
   }, [clauses, moveClause, onClausesChange, stencilDrag !== undefined]);
   // What the ghost shows: the row being moved, or the chip being carried in.
-  const liftedClause = stencilDrag
-    ? (stencilDrag.source ?? clauses[stencilDrag.index])
-    : undefined;
+  const liftedClause = stencilDrag ? (stencilDrag.source ?? clauses[stencilDrag.index]) : undefined;
 
   const addClause = (entry: DatasetResourceIndexEntry, role: RecipeQueryRole) => {
     const already = clauses.some(
@@ -1290,7 +1288,6 @@ export function RecipeSearchOverlay({
               </>
             )}
           </div>
-
         </div>
 
         {/* ===== the stencil: its own detached card, the foot of the T ===== */}
@@ -1299,264 +1296,262 @@ export function RecipeSearchOverlay({
             className="relative w-full max-w-[880px] border-4 border-[#23262d] bg-[#101215] p-3 text-[var(--mc-ink)] shadow-[0_8px_0_rgba(0,0,0,0.5)] compact:p-2"
             onPointerDown={(event) => event.stopPropagation()}
           >
-              <div className="flex items-stretch gap-2 compact:gap-1">
-                {machinePin ? (
-                  /* THE MACHINE PIN: the search came from a card's "add a
+            <div className="flex items-stretch gap-2 compact:gap-1">
+              {machinePin ? (
+                /* THE MACHINE PIN: the search came from a card's "add a
                      recipe" key, so that machine is the whole question. Its
                      picture, its name, one word. Nothing to press: there is
                      no other way to pin one, and closing the search ends it. */
-                  <div className="flex w-[150px] shrink-0 flex-col items-center justify-center gap-1 border-2 border-[var(--mc-33)] bg-[var(--mc-71)] p-2 text-center compact:w-[110px]">
-                    <span className="flex h-12 w-12 items-center justify-center">
-                      {machinePinIcon ? (
+                <div className="flex w-[150px] shrink-0 flex-col items-center justify-center gap-1 border-2 border-[var(--mc-33)] bg-[var(--mc-71)] p-2 text-center compact:w-[110px]">
+                  <span className="flex h-12 w-12 items-center justify-center">
+                    {machinePinIcon ? (
+                      <ResourceIcon
+                        resource={{ ...machinePinIcon, amount: 1 }}
+                        size="sm"
+                        bare
+                        showAmount={false}
+                        tooltip={false}
+                        className="!h-12 !w-12"
+                        iconPixelSize={machineArtPixels(48)}
+                      />
+                    ) : null}
+                  </span>
+                  <span className="w-full truncate text-[13px] font-bold">{machinePin.label}</span>
+                  <span className="text-[11px] uppercase tracking-wide text-[var(--mc-ink-muted)]">
+                    Pinned
+                  </span>
+                </div>
+              ) : null}
+              <StencilSide
+                label="Takes"
+                role="takes"
+                sideClauses={takesClauses}
+                clauses={clauses}
+                op={takesOp}
+                onOpChange={onTakesOpChange}
+                onRemove={removeClause}
+                drag={stencilDrag}
+                onRowPointerDown={beginRowDrag}
+                registerListRef={registerSideList}
+                onOpenPicker={() => setPickerRole(pickerRole === "takes" ? undefined : "takes")}
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  playBoardSound("tick");
+                  onSwapSides();
+                }}
+                aria-label="Swap the takes and makes sides"
+                className="group flex w-14 shrink-0 items-center justify-center self-center border-2 border-transparent text-[var(--mc-ink-muted)] hover:border-[var(--mc-33)] hover:bg-[var(--mc-71)] hover:text-[var(--mc-ink)] compact:w-9"
+                style={{ height: "72px" }}
+              >
+                <svg
+                  aria-hidden
+                  viewBox="0 0 40 24"
+                  className="h-7 w-11 group-hover:hidden"
+                  fill="none"
+                >
+                  <path d="M2 12h26" stroke="currentColor" strokeWidth="5" />
+                  <path d="M24 2l14 10-14 10" fill="currentColor" />
+                </svg>
+                <ArrowLeftRight aria-hidden className="hidden h-7 w-7 group-hover:block" />
+              </button>
+              <StencilSide
+                label="Makes"
+                role="makes"
+                sideClauses={makesClauses}
+                clauses={clauses}
+                op={makesOp}
+                onOpChange={onMakesOpChange}
+                onRemove={removeClause}
+                drag={stencilDrag}
+                onRowPointerDown={beginRowDrag}
+                registerListRef={registerSideList}
+                onOpenPicker={() => setPickerRole(pickerRole === "makes" ? undefined : "makes")}
+              />
+            </div>
+            {pickerRole ? (
+              <ItemPickerPopover
+                role={pickerRole}
+                onPick={(entry, role) => {
+                  playBoardSound("stencilAdd");
+                  addClause(entry, role);
+                }}
+                onClose={() => setPickerRole(undefined)}
+                searchPickerResources={searchPickerResources}
+              />
+            ) : null}
+          </div>
+        </div>
+
+        {/* ===== the lifted condition, riding the pointer ===== */}
+        {stencilDrag?.active && liftedClause ? (
+          <div
+            className="pointer-events-none fixed z-[60] cursor-grabbing"
+            // The drag is tracked in real px; this box is a fixed child of
+            // the zoomed root, so it is placed in shell px.
+            style={{
+              left: (stencilDrag.x - stencilDrag.grabDX) / uiScale,
+              top: (stencilDrag.y - stencilDrag.grabDY) / uiScale,
+              width: stencilDrag.width / uiScale,
+            }}
+          >
+            <span className="flex w-full items-center gap-2 border-2 border-[var(--mc-61)] bg-[var(--mc-47)] py-0.5 pl-0.5 pr-1 shadow-[6px_6px_0_rgba(0,0,0,0.5)]">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden">
+                {liftedClause.id === POWER_EU_CLAUSE_ID ? (
+                  <Zap className="h-4 w-4 fill-current text-amber-300" aria-hidden />
+                ) : (
+                  <ResourceIcon
+                    resource={{ ...liftedClause, amount: 1 }}
+                    size="sm"
+                    bare
+                    showAmount={false}
+                    tooltip={false}
+                    className="!h-full !w-full"
+                    iconPixelSize={machineArtPixels(32)}
+                  />
+                )}
+              </span>
+              <span className="min-w-0 flex-1 truncate text-[14px] font-bold text-[var(--mc-ink)]">
+                {liftedClause.displayName ?? liftedClause.id}
+              </span>
+            </span>
+          </div>
+        ) : null}
+
+        {/* ===== the chip's right-click menu: every way to use an item ===== */}
+        {cardMenu ? (
+          <div
+            ref={menuRef}
+            className="fixed z-50 w-[300px] border-2 border-[var(--mc-15)] bg-[var(--mc-61)] p-1 font-mono shadow-[4px_4px_0_rgba(0,0,0,0.45)]"
+            style={{ left: cardMenu.x, top: cardMenu.y }}
+            onPointerDown={(event) => event.stopPropagation()}
+          >
+            <div className="truncate px-2 py-1 text-[11px] font-bold text-[var(--mc-ink-muted)]">
+              {cardMenu.label}
+            </div>
+            {[
+              ...(!isReadOnly ? [{ label: "Add to board", act: cardMenu.add }] : []),
+              { label: `Hide ${cardMenu.machineLabel}`, act: cardMenu.hide },
+              ...(cardMenu.only
+                ? [{ label: `Only ${cardMenu.machineLabel}`, act: cardMenu.only }]
+                : []),
+              ...(allRecipeMapsSelected
+                ? []
+                : [
+                    {
+                      label: "Show every machine",
+                      act: () => {
+                        playBoardSound("tick");
+                        onToggleAllRecipeMaps();
+                      },
+                    },
+                  ]),
+            ].map((item) => (
+              <button
+                key={item.label}
+                type="button"
+                onClick={() => {
+                  item.act();
+                  setCardMenu(undefined);
+                }}
+                className="block w-full px-2 py-1.5 text-left text-[13px] font-bold text-[var(--mc-ink)] hover:bg-[var(--mc-85)]"
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        ) : null}
+        {chipMenu ? (
+          <div
+            ref={menuRef}
+            className="fixed z-50 w-[300px] border-2 border-[var(--mc-15)] bg-[var(--mc-61)] p-1 font-mono shadow-[4px_4px_0_rgba(0,0,0,0.45)]"
+            style={{ left: chipMenu.x, top: chipMenu.y }}
+            onPointerDown={(event) => event.stopPropagation()}
+          >
+            <div className="truncate px-2 py-1 text-[11px] font-bold text-[var(--mc-ink-muted)]">
+              {resourceLabel(chipMenu.resource)}
+            </div>
+            {(
+              [
+                {
+                  label: "Find what makes it",
+                  act: () => onBrowseResource({ ...chipMenu.resource, amount: 1 }, "recipes"),
+                },
+                {
+                  label: "Find what uses it",
+                  act: () => onBrowseResource({ ...chipMenu.resource, amount: 1 }, "uses"),
+                },
+                {
+                  label: "Add to takes",
+                  act: () => addResourceClause(chipMenu.resource, "takes"),
+                },
+                {
+                  label: "Add to makes",
+                  act: () => addResourceClause(chipMenu.resource, "makes"),
+                },
+              ] as const
+            ).map((item) => (
+              <button
+                key={item.label}
+                type="button"
+                onClick={() => {
+                  item.act();
+                  setChipMenu(undefined);
+                }}
+                className="block w-full px-2 py-1.5 text-left text-[13px] font-bold text-[var(--mc-ink)] hover:bg-[var(--mc-85)]"
+              >
+                {item.label}
+              </button>
+            ))}
+            {chipMenu.picker ? (
+              <>
+                <div className="mx-2 my-1 border-t-2 border-[var(--mc-47)]" />
+                <div className="px-2 py-1 text-[11px] font-bold text-[var(--mc-ink-muted)]">
+                  This slot also takes
+                </div>
+                <div className="recipe-search-scroll max-h-[180px] overflow-y-auto">
+                  {chipMenu.picker.faces.map((face) => (
+                    <button
+                      key={`${face.kind}:${face.id}`}
+                      type="button"
+                      onClick={() => {
+                        chipMenu.picker?.onPick(face);
+                        setChipMenu(undefined);
+                      }}
+                      className={[
+                        "flex w-full items-center gap-2 px-2 py-1 text-left text-[13px] font-bold text-[var(--mc-ink)] hover:bg-[var(--mc-85)]",
+                        face.id === chipMenu.picker?.currentId
+                          ? "bg-[var(--mc-47)] shadow-[inset_3px_0_0_#22d3ee]"
+                          : "",
+                      ].join(" ")}
+                    >
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden ">
                         <ResourceIcon
-                          resource={{ ...machinePinIcon, amount: 1 }}
+                          resource={{ ...face, amount: 1 }}
                           size="sm"
                           bare
                           showAmount={false}
                           tooltip={false}
-                          className="!h-12 !w-12"
-                          iconPixelSize={machineArtPixels(48)}
+                          className="!h-full !w-full"
+                          iconPixelSize={machineArtPixels(24)}
                         />
-                      ) : null}
-                    </span>
-                    <span className="w-full truncate text-[13px] font-bold">{machinePin.label}</span>
-                    <span className="text-[11px] uppercase tracking-wide text-[var(--mc-ink-muted)]">
-                      Pinned
-                    </span>
-                  </div>
-                ) : null}
-                <StencilSide
-                  label="Takes"
-                  role="takes"
-                  sideClauses={takesClauses}
-                  clauses={clauses}
-                  op={takesOp}
-                  onOpChange={onTakesOpChange}
-                  onRemove={removeClause}
-                  drag={stencilDrag}
-                  onRowPointerDown={beginRowDrag}
-                  registerListRef={registerSideList}
-                  onOpenPicker={() => setPickerRole(pickerRole === "takes" ? undefined : "takes")}
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    playBoardSound("tick");
-                    onSwapSides();
-                  }}
-                  aria-label="Swap the takes and makes sides"
-                  className="group flex w-14 shrink-0 items-center justify-center self-center border-2 border-transparent text-[var(--mc-ink-muted)] hover:border-[var(--mc-33)] hover:bg-[var(--mc-71)] hover:text-[var(--mc-ink)] compact:w-9"
-                  style={{ height: "72px" }}
-                >
-                  <svg
-                    aria-hidden
-                    viewBox="0 0 40 24"
-                    className="h-7 w-11 group-hover:hidden"
-                    fill="none"
-                  >
-                    <path d="M2 12h26" stroke="currentColor" strokeWidth="5" />
-                    <path d="M24 2l14 10-14 10" fill="currentColor" />
-                  </svg>
-                  <ArrowLeftRight aria-hidden className="hidden h-7 w-7 group-hover:block" />
-                </button>
-                <StencilSide
-                  label="Makes"
-                  role="makes"
-                  sideClauses={makesClauses}
-                  clauses={clauses}
-                  op={makesOp}
-                  onOpChange={onMakesOpChange}
-                  onRemove={removeClause}
-                  drag={stencilDrag}
-                  onRowPointerDown={beginRowDrag}
-                  registerListRef={registerSideList}
-                  onOpenPicker={() => setPickerRole(pickerRole === "makes" ? undefined : "makes")}
-                />
-              </div>
-              {pickerRole ? (
-                <ItemPickerPopover
-                  role={pickerRole}
-                  onPick={(entry, role) => {
-                    playBoardSound("stencilAdd");
-                    addClause(entry, role);
-                  }}
-                  onClose={() => setPickerRole(undefined)}
-                  searchPickerResources={searchPickerResources}
-                />
-              ) : null}
-            </div>
-          </div>
-
-          {/* ===== the lifted condition, riding the pointer ===== */}
-          {stencilDrag?.active && liftedClause ? (
-            <div
-              className="pointer-events-none fixed z-[60] cursor-grabbing"
-              // The drag is tracked in real px; this box is a fixed child of
-              // the zoomed root, so it is placed in shell px.
-              style={{
-                left: (stencilDrag.x - stencilDrag.grabDX) / uiScale,
-                top: (stencilDrag.y - stencilDrag.grabDY) / uiScale,
-                width: stencilDrag.width / uiScale,
-              }}
-            >
-              <span className="flex w-full items-center gap-2 border-2 border-[var(--mc-61)] bg-[var(--mc-47)] py-0.5 pl-0.5 pr-1 shadow-[6px_6px_0_rgba(0,0,0,0.5)]">
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden">
-                  {liftedClause.id === POWER_EU_CLAUSE_ID ? (
-                    <Zap className="h-4 w-4 fill-current text-amber-300" aria-hidden />
-                  ) : (
-                    <ResourceIcon
-                      resource={{ ...liftedClause, amount: 1 }}
-                      size="sm"
-                      bare
-                      showAmount={false}
-                      tooltip={false}
-                      className="!h-full !w-full"
-                      iconPixelSize={machineArtPixels(32)}
-                    />
-                  )}
-                </span>
-                <span className="min-w-0 flex-1 truncate text-[14px] font-bold text-[var(--mc-ink)]">
-                  {liftedClause.displayName ?? liftedClause.id}
-                </span>
-              </span>
-            </div>
-          ) : null}
-
-          {/* ===== the chip's right-click menu: every way to use an item ===== */}
-          {cardMenu ? (
-            <div
-              ref={menuRef}
-              className="fixed z-50 w-[300px] border-2 border-[var(--mc-15)] bg-[var(--mc-61)] p-1 font-mono shadow-[4px_4px_0_rgba(0,0,0,0.45)]"
-              style={{ left: cardMenu.x, top: cardMenu.y }}
-              onPointerDown={(event) => event.stopPropagation()}
-            >
-              <div className="truncate px-2 py-1 text-[11px] font-bold text-[var(--mc-ink-muted)]">
-                {cardMenu.label}
-              </div>
-              {[
-                ...(!isReadOnly ? [{ label: "Add to board", act: cardMenu.add }] : []),
-                { label: `Hide ${cardMenu.machineLabel}`, act: cardMenu.hide },
-                ...(cardMenu.only
-                  ? [{ label: `Only ${cardMenu.machineLabel}`, act: cardMenu.only }]
-                  : []),
-                ...(allRecipeMapsSelected
-                  ? []
-                  : [
-                      {
-                        label: "Show every machine",
-                        act: () => {
-                          playBoardSound("tick");
-                          onToggleAllRecipeMaps();
-                        },
-                      },
-                    ]),
-              ].map((item) => (
-                <button
-                  key={item.label}
-                  type="button"
-                  onClick={() => {
-                    item.act();
-                    setCardMenu(undefined);
-                  }}
-                  className="block w-full px-2 py-1.5 text-left text-[13px] font-bold text-[var(--mc-ink)] hover:bg-[var(--mc-85)]"
-                >
-                  {item.label}
-                </button>
-              ))}
-            </div>
-          ) : null}
-          {chipMenu ? (
-            <div
-              ref={menuRef}
-              className="fixed z-50 w-[300px] border-2 border-[var(--mc-15)] bg-[var(--mc-61)] p-1 font-mono shadow-[4px_4px_0_rgba(0,0,0,0.45)]"
-              style={{ left: chipMenu.x, top: chipMenu.y }}
-              onPointerDown={(event) => event.stopPropagation()}
-            >
-              <div className="truncate px-2 py-1 text-[11px] font-bold text-[var(--mc-ink-muted)]">
-                {resourceLabel(chipMenu.resource)}
-              </div>
-              {(
-                [
-                  {
-                    label: "Find what makes it",
-                    act: () => onBrowseResource({ ...chipMenu.resource, amount: 1 }, "recipes"),
-                  },
-                  {
-                    label: "Find what uses it",
-                    act: () => onBrowseResource({ ...chipMenu.resource, amount: 1 }, "uses"),
-                  },
-                  {
-                    label: "Add to takes",
-                    act: () => addResourceClause(chipMenu.resource, "takes"),
-                  },
-                  {
-                    label: "Add to makes",
-                    act: () => addResourceClause(chipMenu.resource, "makes"),
-                  },
-                ] as const
-              ).map((item) => (
-                <button
-                  key={item.label}
-                  type="button"
-                  onClick={() => {
-                    item.act();
-                    setChipMenu(undefined);
-                  }}
-                  className="block w-full px-2 py-1.5 text-left text-[13px] font-bold text-[var(--mc-ink)] hover:bg-[var(--mc-85)]"
-                >
-                  {item.label}
-                </button>
-              ))}
-              {chipMenu.picker ? (
-                <>
-                  <div className="mx-2 my-1 border-t-2 border-[var(--mc-47)]" />
-                  <div className="px-2 py-1 text-[11px] font-bold text-[var(--mc-ink-muted)]">
-                    This slot also takes
-                  </div>
-                  <div className="recipe-search-scroll max-h-[180px] overflow-y-auto">
-                    {chipMenu.picker.faces.map((face) => (
-                      <button
-                        key={`${face.kind}:${face.id}`}
-                        type="button"
-                        onClick={() => {
-                          chipMenu.picker?.onPick(face);
-                          setChipMenu(undefined);
-                        }}
-                        className={[
-                          "flex w-full items-center gap-2 px-2 py-1 text-left text-[13px] font-bold text-[var(--mc-ink)] hover:bg-[var(--mc-85)]",
-                          face.id === chipMenu.picker?.currentId
-                            ? "bg-[var(--mc-47)] shadow-[inset_3px_0_0_#22d3ee]"
-                            : "",
-                        ].join(" ")}
-                      >
-                        <span className="flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden ">
-                          <ResourceIcon
-                            resource={{ ...face, amount: 1 }}
-                            size="sm"
-                            bare
-                            showAmount={false}
-                            tooltip={false}
-                            className="!h-full !w-full"
-                            iconPixelSize={machineArtPixels(24)}
-                          />
-                        </span>
-                        <span className="min-w-0 flex-1 truncate">
-                          {face.displayName ?? face.id}
-                        </span>
-                        {/* Three faces all called "Iron Nugget" are three
+                      </span>
+                      <span className="min-w-0 flex-1 truncate">{face.displayName ?? face.id}</span>
+                      {/* Three faces all called "Iron Nugget" are three
                             mods' nuggets: say which, or the list is useless. */}
-                        {face.modId ? (
-                          <span className="shrink-0 text-[11px] font-normal text-[var(--mc-ink-muted)]">
-                            {face.modId}
-                          </span>
-                        ) : null}
-                      </button>
-                    ))}
-                  </div>
-                </>
-              ) : null}
-            </div>
-          ) : null}
+                      {face.modId ? (
+                        <span className="shrink-0 text-[11px] font-normal text-[var(--mc-ink-muted)]">
+                          {face.modId}
+                        </span>
+                      ) : null}
+                    </button>
+                  ))}
+                </div>
+              </>
+            ) : null}
+          </div>
+        ) : null}
       </section>
     </div>,
     document.body,
@@ -1615,21 +1610,9 @@ function StencilSide({
           {label}
         </span>
         <span className="flex items-center border-2 border-[var(--mc-47)] bg-[var(--mc-25)]">
-          <OpPill
-            label="Any"
-            active={op === "any"}
-            onClick={() => changeOp("any")}
-          />
-          <OpPill
-            label="All"
-            active={op === "all"}
-            onClick={() => changeOp("all")}
-          />
-          <OpPill
-            label="Only"
-            active={op === "only"}
-            onClick={() => changeOp("only")}
-          />
+          <OpPill label="Any" active={op === "any"} onClick={() => changeOp("any")} />
+          <OpPill label="All" active={op === "all"} onClick={() => changeOp("all")} />
+          <OpPill label="Only" active={op === "only"} onClick={() => changeOp("only")} />
         </span>
       </div>
       {/* A fixed-height stack so removing a row never moves the card. The
@@ -1784,7 +1767,9 @@ function MachineSectionHeader({
           <Star aria-hidden className="h-5 w-5 text-[var(--mc-ink-muted)]" />
         )}
       </span>
-      <span className="min-w-0 truncate text-[16px] font-bold uppercase tracking-[0.06em] text-[var(--mc-ink)]">{label}</span>
+      <span className="min-w-0 truncate text-[16px] font-bold uppercase tracking-[0.06em] text-[var(--mc-ink)]">
+        {label}
+      </span>
       {count !== undefined ? (
         <span className="shrink-0 text-[13px] font-bold text-[var(--mc-ink-muted)] tabular-nums">
           {count.toLocaleString()}
@@ -1795,7 +1780,9 @@ function MachineSectionHeader({
         aria-hidden
       >
         <ChevronDown
-          className={["h-4 w-4 transition-transform duration-150", open ? "" : "-rotate-90"].join(" ")}
+          className={["h-4 w-4 transition-transform duration-150", open ? "" : "-rotate-90"].join(
+            " ",
+          )}
         />
       </span>
     </button>
@@ -1905,6 +1892,9 @@ const CompactRecipeCard = memo(function CompactRecipeCard({
   const handlers = useMemo(() => getRecipeMachineHandlers(preview), [preview]);
   const primary = handlers[0];
   const machineLabel = primary?.label ?? recipe.machineType;
+  const isPlannerUnavailable =
+    recipe.metadata?.rateUnknown === true || recipe.metadata?.planningUnavailable === true;
+  const effectiveRateView = isPlannerUnavailable ? "recipe" : rateView;
   // A dataset recipe is written in its primary machine's numbers already; the
   // synthesized Auto Workbench is the one handler that brings its own (the
   // crafting maps are exported instant), so the card and its rate views read
@@ -1920,8 +1910,20 @@ const CompactRecipeCard = memo(function CompactRecipeCard({
   const eut = isAutoWorkbench ? (primary.eut ?? recipe.eut) : recipe.eut;
   const minimumTier = isAutoWorkbench ? primary.minimumTier : recipe.minimumTier;
   const seconds = durationTicks / 20;
-  const secondsText = `${formatRate(seconds, seconds >= 10 ? 0 : 1)}s`;
-  const powerText = eut > 0 ? `${eut.toLocaleString()} EU/t` : "no power";
+  const secondsText = isPlannerUnavailable
+    ? typeof recipe.metadata?.planningUnavailableReason === "string"
+      ? recipe.metadata.planningUnavailableReason
+      : "Rate unknown"
+    : `${formatRate(seconds, seconds >= 10 ? 0 : 1)}s`;
+  const powerText = isPlannerUnavailable
+    ? typeof recipe.metadata?.powerGenerationEUt === "number"
+      ? `${recipe.metadata.powerGenerationEUt.toLocaleString()} EU/t generated`
+      : recipe.outputs.length === 0
+        ? "Output unknown"
+        : "Power unknown"
+    : eut > 0
+      ? `${eut.toLocaleString()} EU/t`
+      : "no power";
   const tierColor =
     eut > 0 ? GT_TIER_COLORS[minimumTier as Exclude<MachineTier, "DEMO">] : undefined;
   // Crafting-grid recipes arrive one slot at a time, so identical items merge
@@ -1959,7 +1961,7 @@ const CompactRecipeCard = memo(function CompactRecipeCard({
   // and any non-whole amount (a substitute's scaled cost) leaves the recipe
   // unreduced rather than lying about it.
   const ratioDivisor = useMemo(() => {
-    if (rateView !== "ratio") {
+    if (effectiveRateView !== "ratio") {
       return 1;
     }
     let divisor = 0;
@@ -1976,7 +1978,7 @@ const CompactRecipeCard = memo(function CompactRecipeCard({
       divisor = greatestCommonDivisor(divisor, amount);
     }
     return divisor > 0 ? divisor : 1;
-  }, [inputChips, outputChips, rateView]);
+  }, [inputChips, outputChips, effectiveRateView]);
   // A merged chip stands for every slot it swallowed, so a pick lands on all
   // of their indexes at once.
   const pickFace = useCallback((indexes: number[], face: AlternativeCycleFace) => {
@@ -2010,8 +2012,13 @@ const CompactRecipeCard = memo(function CompactRecipeCard({
     }, 150);
   }, [cancelPrefetch, onPrefetch, recipe.id]);
   useEffect(() => cancelPrefetch, [cancelPrefetch]);
-  const openMenu = (event: ReactMouseEvent) =>
+  const openMenu = (event: ReactMouseEvent) => {
+    if (isPlannerUnavailable) {
+      event.preventDefault();
+      return;
+    }
     onCardMenu(event, `${machineLabel} recipes`, () => void onAdd(recipe, undefined, inputPicks));
+  };
   const headPress = useLongPress(openMenu);
 
   return (
@@ -2022,7 +2029,9 @@ const CompactRecipeCard = memo(function CompactRecipeCard({
         }
         onSelectRecipe(recipe.id);
       }}
-      onDoubleClick={() => { if (!isReadOnly) void onAdd(recipe, undefined, inputPicks); }}
+      onDoubleClick={() => {
+        if (!isReadOnly && !isPlannerUnavailable) void onAdd(recipe, undefined, inputPicks);
+      }}
       onContextMenu={openMenu}
       onPointerEnter={armPrefetch}
       onPointerLeave={cancelPrefetch}
@@ -2062,8 +2071,14 @@ const CompactRecipeCard = memo(function CompactRecipeCard({
         <button
           type="button"
           aria-label="Add recipe node"
-          disabled={isReadOnly}
-          title={isReadOnly ? "Open a copy to add recipes" : undefined}
+          disabled={isReadOnly || isPlannerUnavailable}
+          title={
+            isPlannerUnavailable
+              ? "Machine behavior unavailable; cannot add to a plan"
+              : isReadOnly
+                ? "Open a copy to add recipes"
+                : undefined
+          }
           onClick={(event) => {
             event.stopPropagation();
             void onAdd(recipe, undefined, inputPicks);
@@ -2095,10 +2110,15 @@ const CompactRecipeCard = memo(function CompactRecipeCard({
                   isFreeRecipeInput(chip.raw) && !isControllerSlotInput(chip.raw)
                     ? { text: "FREE" }
                     : chip.raw.consumed === false
-                    ? { text: "NC" }
-                    : rateView === "eu"
-                      ? formatChipEnergy(chip.resource, "input", eut, durationTicks)
-                      : formatChipAmount(chip.resource, rateView, durationTicks, ratioDivisor)
+                      ? { text: "NC" }
+                      : effectiveRateView === "eu"
+                        ? formatChipEnergy(chip.resource, "input", eut, durationTicks)
+                        : formatChipAmount(
+                            chip.resource,
+                            effectiveRateView,
+                            durationTicks,
+                            ratioDivisor,
+                          )
                 }
                 onCycle={
                   chip.faces.length > 1
@@ -2132,9 +2152,9 @@ const CompactRecipeCard = memo(function CompactRecipeCard({
               key={`out-${index}`}
               resource={output}
               amountText={
-                rateView === "eu"
+                effectiveRateView === "eu"
                   ? formatChipEnergy(output, "output", eut, durationTicks)
-                  : formatChipAmount(output, rateView, durationTicks, ratioDivisor)
+                  : formatChipAmount(output, effectiveRateView, durationTicks, ratioDivisor)
               }
               chance={"chance" in output ? output.chance : undefined}
               onBrowseResource={onBrowseResource}
@@ -2527,7 +2547,9 @@ function ResourceChip({
               "ml-0.5 font-bold",
               // The energy unit is a tail, not part of the number: a size down
               // again, in the greyed gold that sits under the reading.
-              amountText.energy ? "text-[10px] font-medium text-[#8c7d4c]" : "text-[11px] text-[var(--mc-ink-muted)]",
+              amountText.energy
+                ? "text-[10px] font-medium text-[#8c7d4c]"
+                : "text-[11px] text-[var(--mc-ink-muted)]",
             ].join(" ")}
           >
             {amountText.unit}
@@ -2694,7 +2716,11 @@ function formatChipEnergy(
 ): ChipAmount {
   const perUnit =
     resource.amount > 0 ? (Math.max(0, eut) * Math.max(0, durationTicks)) / resource.amount : 0;
-  return { text: formatCompact(perUnit), unit: energyPerUnitSuffix(resource.kind).trim(), energy: side };
+  return {
+    text: formatCompact(perUnit),
+    unit: energyPerUnitSuffix(resource.kind).trim(),
+    energy: side,
+  };
 }
 
 /** "7.0" is 7 and "7.50" is 7.5: a trailing zero says nothing. */
@@ -2732,7 +2758,6 @@ function formatChipAmount(
     ? { text, unit: `L/${unit.per}` }
     : { text, unit: `/${unit.per}` };
 }
-
 
 /**
  * The search covers everything RIGHT of the item browser. The left column
