@@ -21,6 +21,10 @@ npm run typecheck
 npm run test
 ```
 
+If you have GNU Make installed, run `make help` to see short commands such as
+`make dev`, `make check`, and `make build`. On Windows, `make` is available in
+the MSYS2 installation used for this project.
+
 The repository includes the Monifactory 0.13.7 Normal dataset and
 `public/datasets/factory/datasets.manifest.json`, so the app is ready after installation.
 Follow [the exporter instructions](tools/monifactory/README.md) to rebuild it for a new pack version.
