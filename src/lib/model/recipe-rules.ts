@@ -9,6 +9,10 @@ import {
   normalizeFusionHandler,
 } from "@/lib/machines/fusion";
 import { TGS_MACHINE_TYPE, tgsEuPerTick } from "@/lib/machines/tree-growth-simulator";
+import {
+  isMonifactoryPyrolyseRecipe,
+  MONIFACTORY_PYROLYSE_COIL_CONTROL,
+} from "@/lib/machines/monifactory-pyrolyse";
 import type {
   FactoryNode,
   MachineConfigControl,
@@ -55,6 +59,16 @@ export function getRecipeMachineHandlers(
   // without exported handlers.
   if (recipe.id === CROP_FARM_PLACEHOLDER_RECIPE_ID && !recipe.machineHandlers?.length) {
     return createCropFarmPlaceholderRecipe().machineHandlers!;
+  }
+  if (isMonifactoryPyrolyseRecipe(recipe)) {
+    return [{
+      id: "pyrolyse_oven",
+      label: "Pyrolyse Oven",
+      machineType: "Pyrolyse Oven",
+      minimumTier: recipe.minimumTier,
+      kind: "multiblock",
+      machineConfigControls: [MONIFACTORY_PYROLYSE_COIL_CONTROL],
+    }];
   }
   if (recipe.source?.datasetVersionId?.startsWith("monifactory-")) {
     const map = recipe.source.recipeMap;
@@ -232,6 +246,7 @@ export function applyMachineHandlerToRecipe(
       minimumTier: handler.minimumTier,
       durationTicks: handler.durationTicks ?? recipe.durationTicks,
       eut: handler.eut ?? recipe.eut,
+      machineConfigControls: handler.machineConfigControls ?? recipe.machineConfigControls,
       machineProfile: {
         ...recipe.machineProfile,
         machineType: handler.machineType,

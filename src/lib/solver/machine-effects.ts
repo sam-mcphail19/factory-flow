@@ -5,6 +5,10 @@ import {
   isEecRecipe,
 } from "@/lib/machines/extreme-entity-crusher";
 import { getTgsOutputMultiplier, isTgsRecipe } from "@/lib/machines/tree-growth-simulator";
+import {
+  isMonifactoryPyrolyseRecipe,
+  monifactoryPyrolyseDurationMultiplier,
+} from "@/lib/machines/monifactory-pyrolyse";
 import { getVatOutputMultiplier, isVatRecipe } from "@/lib/machines/bacterial-vat";
 import {
   getRecipeCoilTierControl,
@@ -389,6 +393,10 @@ export function getMachineDurationMultiplier(
   recipe: MachineEffectRecipe,
   node: MachineEffectNode,
 ): number {
+  if (isMonifactoryPyrolyseRecipe(recipe)) {
+    const coil = getRecipeCoilTierControl(recipe, node);
+    return monifactoryPyrolyseDurationMultiplier(coil?.current.key ?? "kanthal");
+  }
   const cropStats = getCropsNhStats(recipe);
   if (cropStats) {
     const setup = cropsNhHarvesterFromTiers(
