@@ -13,6 +13,7 @@ import {
   isMonifactoryPyrolyseRecipe,
   MONIFACTORY_PYROLYSE_COIL_CONTROL,
 } from "@/lib/machines/monifactory-pyrolyse";
+import { isMonifactoryEbfRecipe, monifactoryEbfCoilControl } from "@/lib/machines/monifactory-ebf";
 import type {
   FactoryNode,
   MachineConfigControl,
@@ -68,6 +69,16 @@ export function getRecipeMachineHandlers(
       minimumTier: recipe.minimumTier,
       kind: "multiblock",
       machineConfigControls: [MONIFACTORY_PYROLYSE_COIL_CONTROL],
+    }];
+  }
+  if (isMonifactoryEbfRecipe(recipe)) {
+    return [{
+      id: "electric-blast-furnace",
+      label: "Electric Blast Furnace",
+      machineType: "Electric Blast Furnace",
+      minimumTier: recipe.minimumTier,
+      kind: "multiblock",
+      machineConfigControls: [monifactoryEbfCoilControl(recipe)],
     }];
   }
   if (recipe.source?.datasetVersionId?.startsWith("monifactory-")) {
@@ -326,9 +337,10 @@ export function getRecipeCoilTierControl(
   if (getMachineHiddenControlIds(recipe.machineType).includes("heatingCoil")) {
     return undefined;
   }
-  const control =
-    getMachineTableControls(recipe.machineType).find((entry) => entry.id === "heatingCoil") ??
-    findMachineConfigControl(recipe, "heatingCoil");
+  const control = recipe.source?.datasetVersionId?.startsWith("monifactory-")
+    ? findMachineConfigControl(recipe, "heatingCoil")
+    : getMachineTableControls(recipe.machineType).find((entry) => entry.id === "heatingCoil") ??
+      findMachineConfigControl(recipe, "heatingCoil");
   return control
     ? resolveMachineConfigTierControl(applyControlRecipeMinimum(control, recipe), node.coilTier)
     : undefined;

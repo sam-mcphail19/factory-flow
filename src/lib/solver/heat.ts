@@ -3,6 +3,7 @@ import {
   getRecipeSpecialValue,
 } from "@/lib/model/recipe-rules";
 import { getMachineBehaviour } from "@/lib/machines/machine-table";
+import { getMonifactoryEbfTemperature, isMonifactoryEbfRecipe } from "@/lib/machines/monifactory-ebf";
 import { getVoltageTierIndex } from "@/lib/model/tiers";
 import type { FactoryNode, MachineTier, Recipe } from "@/lib/model/types";
 
@@ -59,7 +60,10 @@ export function getHeatOverclockStats(
    */
   voltageOrdinal?: number,
 ): HeatOverclockStats {
-  const specialValue = getRecipeSpecialValue(recipe);
+  const monifactoryEbf = isMonifactoryEbfRecipe(recipe);
+  const specialValue = monifactoryEbf
+    ? getMonifactoryEbfTemperature(recipe)
+    : getRecipeSpecialValue(recipe);
   const coilControl = recipe.machineType
     ? getRecipeCoilTierControl(
         {
@@ -79,7 +83,7 @@ export function getHeatOverclockStats(
     specialValue === undefined ||
     specialValue < 0 ||
     !coilControl?.current.heat ||
-    !isHeatOverclockMachine(recipe.machineType)
+    !(monifactoryEbf || isHeatOverclockMachine(recipe.machineType))
   ) {
     return {
       heatOverclockSteps: 0,
@@ -89,11 +93,11 @@ export function getHeatOverclockStats(
   }
 
   const heatConfig = getMachineBehaviour(recipe.machineType)?.heat;
-  const coilHeat = coilControl.current.heat * (heatConfig?.coilHeatMultiplier ?? 1);
+  const coilHeat = coilControl.current.heat * (monifactoryEbf ? 1 : heatConfig?.coilHeatMultiplier ?? 1);
   // Only the blast furnaces and the Exothermic Hearth add 100 K per voltage
   // tier above MV; Volcanus and the Utupu-Tanuri read their coils raw.
   const effectiveOrdinal = voltageOrdinal ?? getVoltageTierIndex(tier);
-  const machineHeat = heatConfig?.voltageBonus
+  const machineHeat = (monifactoryEbf || heatConfig?.voltageBonus)
     ? coilHeat + 100 * Math.max(0, effectiveOrdinal - VOLTAGE_TIER_INDEX_MV)
     : coilHeat;
   const heatExcess = Math.max(0, machineHeat - specialValue);
@@ -103,7 +107,8 @@ export function getHeatOverclockStats(
     heatOverclockSteps,
     regularOverclockSteps: overclockSteps - heatOverclockSteps,
     heatDiscountMultiplier:
-      heatConfig?.discount === false ? 1 : 0.95 ** Math.floor(heatExcess / 900),
+      (monifactoryEbf && specialValue < 900) || (!monifactoryEbf && heatConfig?.discount === false)
+        ? 1 : 0.95 ** Math.floor(heatExcess / 900),
   };
 }
 

@@ -2,6 +2,7 @@ import { maxInputTierSkips } from "./power-input-rules";
 import { getFusionStats } from "@/lib/machines/fusion";
 import {
   applyMachineHandlerToRecipe,
+  getRecipeCoilTierControl,
   getSelectedMachineHandler,
   GT_FURNACE_RECIPE_EUT,
   isHighPressureSteamHandler,
@@ -9,6 +10,7 @@ import {
   isSteamMachineHandler,
 } from "@/lib/model/recipe-rules";
 import { getEnergyHatchType } from "@/lib/machines/energy-hatches";
+import { getMonifactoryEbfTemperature, isMonifactoryEbfRecipe } from "@/lib/machines/monifactory-ebf";
 import { getMachineBehaviour, STEAM_PRESSURE } from "@/lib/machines/machine-table";
 import {
   getRecipeMinimumVoltageTier,
@@ -143,7 +145,17 @@ export function getNodePowerReport(recipe: Recipe, node: PowerReportNode): NodeP
     ? fusion.recipeMark === undefined ? "Fusion startup metadata is unavailable for this recipe."
       : `This recipe requires a Mk-${fusion.recipeMark} fusion reactor or higher.`
     : undefined;
-  const recipeGateReason = fusionGateReason ?? behaviour?.recipeGate?.(
+  const ebfTemperature = isMonifactoryEbfRecipe(effectiveRecipe)
+    ? getMonifactoryEbfTemperature(effectiveRecipe) : undefined;
+  const coilHeat = ebfTemperature !== undefined
+    ? getRecipeCoilTierControl(effectiveRecipe, node)?.current.heat : undefined;
+  const machineHeat = (coilHeat ?? 0) + 100 * Math.max(0,
+    getEffectiveVoltageOrdinal(effectiveRecipe, node, tier) - getVoltageTierIndex("MV"),
+  );
+  const ebfGateReason = ebfTemperature !== undefined && machineHeat < ebfTemperature
+    ? `Requires ${ebfTemperature} K. Selected coils and voltage provide ${machineHeat} K.`
+    : undefined;
+  const recipeGateReason = ebfGateReason ?? fusionGateReason ?? behaviour?.recipeGate?.(
     buildMachineContext(effectiveRecipe, node),
   ) ?? casingGateReason;
 

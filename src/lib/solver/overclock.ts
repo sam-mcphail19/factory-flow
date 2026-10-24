@@ -3,6 +3,7 @@ import { getFusionStats } from "@/lib/machines/fusion";
 import { getEecMetadata, getEecSettings, getEecStats } from "@/lib/machines/extreme-entity-crusher";
 import { getTgsStats, isTgsRecipe } from "@/lib/machines/tree-growth-simulator";
 import { getMonifactorySingleblockStats } from "@/lib/machines/monifactory-singleblock";
+import { isMonifactoryEbfRecipe } from "@/lib/machines/monifactory-ebf";
 import {
   GT_VOLTAGE_TIERS,
   getRecipeMinimumVoltageTier,
@@ -410,6 +411,9 @@ function resolveOverclockRule(
   node: Pick<FactoryNode, "machineConfigTiers" | "coilTier" | "overclockTier">,
   heatOverclockSteps: number,
 ): OverclockRule {
+  if (isMonifactoryEbfRecipe(recipe)) {
+    return OVERCLOCK.perfectThenNormal(heatOverclockSteps);
+  }
   const behaviour = getMachineBehaviour(recipe.machineType);
   const spec = behaviour
     ? resolveOverclockSpec(behaviour, buildMachineContext(recipe as Recipe, node))

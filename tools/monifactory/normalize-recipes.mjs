@@ -308,6 +308,10 @@ function convertRecipe(entry, type) {
   let metadata;
   let notes;
   let inputSide = raw.inputs;
+  if (type === "gtceu:electric_blast_furnace" &&
+      Number.isSafeInteger(raw.data?.ebf_temp) && raw.data.ebf_temp >= 0) {
+    metadata = { ebfTemperature: raw.data.ebf_temp };
+  }
   if (type === "gtceu:microverse") {
     const requirement = raw.inputs?.microverse;
     if (

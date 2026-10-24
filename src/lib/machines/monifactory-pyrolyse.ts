@@ -9,15 +9,15 @@ export function isMonifactoryPyrolyseRecipe(
 
 // GTCEu's pyrolyse modifier uses the coil's ordinal: Cupronickel runs at
 // 75% speed, then each higher coil uses 2 / (ordinal + 1) duration.
-const COILS = [
-  ["cupronickel", "Cupronickel"],
-  ["kanthal", "Kanthal"],
-  ["nichrome", "Nichrome"],
-  ["rtm_alloy", "RTM Alloy"],
-  ["hssg", "HSS-G"],
-  ["naquadah", "Naquadah"],
-  ["trinium", "Trinium"],
-  ["tritanium", "Tritanium"],
+export const MONIFACTORY_COILS = [
+  ["cupronickel", "Cupronickel", 1800],
+  ["kanthal", "Kanthal", 2700],
+  ["nichrome", "Nichrome", 3600],
+  ["rtm_alloy", "RTM Alloy", 4500],
+  ["hssg", "HSS-G", 5400],
+  ["naquadah", "Naquadah", 7200],
+  ["trinium", "Trinium", 9001],
+  ["tritanium", "Tritanium", 10800],
 ] as const;
 
 export const MONIFACTORY_PYROLYSE_COIL_CONTROL: MachineConfigControl = {
@@ -25,9 +25,10 @@ export const MONIFACTORY_PYROLYSE_COIL_CONTROL: MachineConfigControl = {
   label: "Heating Coil",
   minimumKey: "cupronickel",
   defaultKey: "kanthal",
-  tiers: COILS.map(([key, label]) => ({
+  tiers: MONIFACTORY_COILS.map(([key, label, heat]) => ({
     key,
     label,
+    heat,
     resource: {
       kind: "item",
       id: `gtceu:${key}_coil_block`,
@@ -39,6 +40,6 @@ export const MONIFACTORY_PYROLYSE_COIL_CONTROL: MachineConfigControl = {
 };
 
 export function monifactoryPyrolyseDurationMultiplier(coilKey: string): number {
-  const tier = Math.max(0, COILS.findIndex(([key]) => key === coilKey));
+  const tier = Math.max(0, MONIFACTORY_COILS.findIndex(([key]) => key === coilKey));
   return tier === 0 ? 4 / 3 : 2 / (tier + 1);
 }
