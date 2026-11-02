@@ -16,6 +16,8 @@ interface AppMenuProps {
   onShare: () => void;
   /** Opens the export-image dialog, also owned by the header. */
   onExportImage: () => void;
+  /** Opens the steady-state pattern preview, also owned by the header. */
+  onPattern: () => void;
   /** Opens the settings dialog, also owned by the header. */
   onOpenSettings: () => void;
 }
@@ -30,6 +32,7 @@ export function AppMenu({
   onLoadDatasetVersion,
   onShare,
   onExportImage,
+  onPattern,
   onOpenSettings,
 }: AppMenuProps) {
   const [isOpen, setOpen] = useState(false);
@@ -72,6 +75,7 @@ export function AppMenu({
               onAction={() => setOpen(false)}
               onShare={onShare}
               onExportImage={onExportImage}
+              onPattern={onPattern}
             />
           </MenuSection>
           <MenuSection label="Planner">

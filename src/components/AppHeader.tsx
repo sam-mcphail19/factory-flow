@@ -16,6 +16,7 @@ import { DesignTabs } from "./DesignTabs";
 import { AppMenu } from "./AppMenu";
 import { BoardActions } from "./BoardActions";
 import { ExportImageDialog } from "./export/ExportImageDialog";
+import { SteadyStatePatternDialogFromStore } from "./export/SteadyStatePatternDialog";
 import { DevMenu } from "./DevMenu";
 import { SettingsDialog } from "./SettingsDialog";
 import { WelcomeButton } from "./HeaderLinks";
@@ -54,6 +55,7 @@ export function AppHeader({ onLoadDatasetVersion }: AppHeaderProps) {
   // same reason.
   const [isShareOpen, setShareOpen] = useState(false);
   const [isExportOpen, setExportOpen] = useState(false);
+  const [isPatternOpen, setPatternOpen] = useState(false);
   // The shelf asks for the share dialog by event after putting a design on
   // the canvas ("Update post"): same dialog, same board, no second copy.
   useEffect(() => {
@@ -123,12 +125,14 @@ export function AppHeader({ onLoadDatasetVersion }: AppHeaderProps) {
       {isDevMenuOpen ? <DevMenu onClose={() => setDevMenuOpen(false)} /> : null}
       {isShareOpen ? <SharePlanDialog onClose={() => setShareOpen(false)} /> : null}
       {isExportOpen ? <ExportImageDialog onClose={() => setExportOpen(false)} /> : null}
+      {isPatternOpen ? <SteadyStatePatternDialogFromStore onClose={() => setPatternOpen(false)} /> : null}
       {isSettingsOpen ? <SettingsDialog onClose={() => setSettingsOpen(false)} /> : null}
       {isCompact ? (
         <AppMenu
           onLoadDatasetVersion={onLoadDatasetVersion}
           onShare={() => setShareOpen(true)}
           onExportImage={() => setExportOpen(true)}
+          onPattern={() => setPatternOpen(true)}
           onOpenSettings={() => setSettingsOpen(true)}
         />
       ) : (
@@ -138,6 +142,7 @@ export function AppHeader({ onLoadDatasetVersion }: AppHeaderProps) {
           <BoardActions
             onShare={() => setShareOpen(true)}
             onExportImage={() => setExportOpen(true)}
+            onPattern={() => setPatternOpen(true)}
           />
           {/* Settings is a plain utility square, not a coloured call to action. */}
           <button

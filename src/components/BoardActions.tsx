@@ -10,6 +10,7 @@ import {
   Download,
   ImageDown,
   LoaderCircle,
+  Repeat2,
   Share2,
   Trash2,
   Upload,
@@ -73,6 +74,8 @@ interface BoardActionsProps {
   onShare?: () => void;
   /** Opens the export-image dialog; owned by the header for the same reason. */
   onExportImage?: () => void;
+  /** Opens the steady-state pattern preview, owned by the header. */
+  onPattern?: () => void;
 }
 
 /**
@@ -84,6 +87,7 @@ export function BoardActions({
   onAction,
   onShare,
   onExportImage,
+  onPattern,
 }: BoardActionsProps = {}) {
   const isReadOnly = useFactoryStore((state) => state.isReadOnly);
   const projectInputRef = useRef<HTMLInputElement>(null);
@@ -323,6 +327,10 @@ export function BoardActions({
             void copyDiagnostics();
           }}
         />
+        {onPattern ? <MenuAction icon={Repeat2} label="Steady-state pattern..." onClick={() => {
+          onPattern();
+          onAction?.();
+        }} /> : null}
         <MenuAction
           icon={Download}
           label="Export as JSON"
@@ -419,6 +427,14 @@ export function BoardActions({
                 }}
               />
               <div className="my-1 border-t border-line-strong" />
+              {onPattern ? <ExportMenuItem
+                icon={Repeat2}
+                label="Steady-state pattern..."
+                onClick={() => {
+                  setExportMenuOpen(false);
+                  onPattern();
+                }}
+              /> : null}
               <ExportMenuItem
                 icon={Download}
                 label="Export plan JSON"
