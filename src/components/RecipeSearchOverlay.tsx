@@ -1241,6 +1241,7 @@ export function RecipeSearchOverlay({
                               <label className="flex items-center gap-1.5">
                                 Coil
                                 <select
+                                  aria-label="Coil"
                                   className="border-2 border-[var(--mc-33)] bg-[#17191d] px-1.5 py-1 text-neutral-100"
                                   value={ebfCoil}
                                   onChange={(event) => setEbfCoil(event.target.value)}
@@ -1255,6 +1256,7 @@ export function RecipeSearchOverlay({
                               <label className="flex items-center gap-1.5">
                                 Voltage
                                 <select
+                                  aria-label="Voltage"
                                   className="border-2 border-[var(--mc-33)] bg-[#17191d] px-1.5 py-1 text-neutral-100"
                                   value={ebfVoltage}
                                   onChange={(event) =>
