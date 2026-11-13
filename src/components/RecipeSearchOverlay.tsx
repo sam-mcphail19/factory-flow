@@ -34,7 +34,10 @@ import {
   machineCycleTicks,
 } from "@/lib/model";
 import type { MachineTier, ResourceAmount } from "@/lib/model/types";
-import { getVoltageTierIndex } from "@/lib/model/tiers";
+import { getVoltageTierIndex, resolveVoltageTier } from "@/lib/model/tiers";
+import { getMonifactoryEbfTemperature, isMonifactoryEbfRecipe } from "@/lib/machines/monifactory-ebf";
+import { MONIFACTORY_COILS } from "@/lib/machines/monifactory-pyrolyse";
+import { getNodePowerReport } from "@/lib/solver/power-report";
 import { energyPerUnitSuffix, type TimeRateUnit } from "@/lib/model/rate-unit";
 import { formatCompact, resourceLabel } from "@/lib/model/resources";
 import { playBoardSound } from "@/lib/board-sounds";
@@ -300,6 +303,8 @@ export function RecipeSearchOverlay({
   const sheet = compact || layout.sheet;
   const [pickerRole, setPickerRole] = useState<RecipeQueryRole | undefined>(undefined);
   const [rateView, setRateView] = useState<RateView>(() => storedRateView);
+  const [ebfCoil, setEbfCoil] = useState<string>(MONIFACTORY_COILS[0][0]);
+  const [ebfVoltage, setEbfVoltage] = useState<Exclude<MachineTier, "DEMO">>("MV");
   const changeRateView = useCallback((view: RateView) => {
     storedRateView = view;
     setRateView(view);
@@ -1231,6 +1236,41 @@ export function RecipeSearchOverlay({
                             onToggle={() => hideRecipeMap(section.id)}
                             onHover={() => onRecipeMapHover(section.id)}
                           />
+                          {section.open && section.id === "gtceu:electric_blast_furnace" && (
+                            <div className="mb-2 flex flex-wrap items-center gap-2 text-xs">
+                              <label className="flex items-center gap-1.5">
+                                Coil
+                                <select
+                                  className="border-2 border-[var(--mc-33)] bg-[#17191d] px-1.5 py-1 text-neutral-100"
+                                  value={ebfCoil}
+                                  onChange={(event) => setEbfCoil(event.target.value)}
+                                >
+                                  {MONIFACTORY_COILS.map(([key, label, heat]) => (
+                                    <option key={key} value={key}>
+                                      {label} ({heat} K)
+                                    </option>
+                                  ))}
+                                </select>
+                              </label>
+                              <label className="flex items-center gap-1.5">
+                                Voltage
+                                <select
+                                  className="border-2 border-[var(--mc-33)] bg-[#17191d] px-1.5 py-1 text-neutral-100"
+                                  value={ebfVoltage}
+                                  onChange={(event) =>
+                                    setEbfVoltage(resolveVoltageTier(event.target.value, "MV"))
+                                  }
+                                >
+                                  {GT_VOLTAGE_TIERS.map(({ tier }) => (
+                                    <option key={tier} value={tier}>
+                                      {tier}
+                                    </option>
+                                  ))}
+                                </select>
+                              </label>
+                              <span>1 A</span>
+                            </div>
+                          )}
                           {section.open && (section.recipes.length > 0 || awaited > 0) ? (
                             <div
                               className="grid items-start gap-2"
@@ -1253,6 +1293,8 @@ export function RecipeSearchOverlay({
                                   onChipMenu={openChipMenu}
                                   onChipDragStart={beginChipDrag}
                                   rateView={rateView}
+                                  ebfCoil={ebfCoil}
+                                  ebfVoltage={ebfVoltage}
                                   onCardMenu={(event, machineLabel, add) =>
                                     openCardMenu(event, {
                                       label: recipe.name,
@@ -1864,6 +1906,8 @@ const CompactRecipeCard = memo(function CompactRecipeCard({
   onChipMenu,
   onChipDragStart,
   rateView,
+  ebfCoil,
+  ebfVoltage,
   onCardMenu,
 }: {
   recipe: RecipeSummary;
@@ -1881,6 +1925,8 @@ const CompactRecipeCard = memo(function CompactRecipeCard({
   /** A slot chip pressed with the mouse: the stencil may pick it up. */
   onChipDragStart?: (resource: ResourceAmount, event: ReactPointerEvent<HTMLElement>) => void;
   rateView: RateView;
+  ebfCoil: string;
+  ebfVoltage: Exclude<MachineTier, "DEMO">;
   /** Right click (or a held press on the header): the card's menu. */
   onCardMenu: (event: ReactMouseEvent, machineLabel: string, add: () => void) => void;
 }) {
@@ -1891,6 +1937,16 @@ const CompactRecipeCard = memo(function CompactRecipeCard({
   const isReadOnly = useFactoryStore((state) => state.isReadOnly);
   const handlers = useMemo(() => getRecipeMachineHandlers(preview), [preview]);
   const primary = handlers[0];
+  const ebfTemperature = isMonifactoryEbfRecipe(preview)
+    ? getMonifactoryEbfTemperature(preview)
+    : undefined;
+  const ebfReport = useMemo(() => {
+    if (ebfTemperature === undefined) return undefined;
+    return getNodePowerReport(preview, {
+      overclockTier: ebfVoltage,
+      machineConfigTiers: { heatingCoil: ebfCoil },
+    });
+  }, [preview, ebfTemperature, ebfCoil, ebfVoltage]);
   const machineLabel = primary?.label ?? recipe.machineType;
   const isPlannerUnavailable =
     recipe.metadata?.rateUnknown === true || recipe.metadata?.planningUnavailable === true;
@@ -2088,6 +2144,13 @@ const CompactRecipeCard = memo(function CompactRecipeCard({
           <Plus className="h-3.5 w-3.5" />
         </button>
       </div>
+      {ebfReport && (
+        <p className="mt-1.5 text-xs font-semibold text-[var(--mc-ink)]">
+          {ebfReport.recipeGateReason ?? (ebfReport.state === "ok"
+            ? `${ebfTemperature} K required · ${ebfReport.overclockSteps} total OC · ${ebfReport.perfectOverclockSteps} perfect OC`
+            : `${ebfTemperature} K required · Needs more voltage`)}
+        </p>
+      )}
       {/* Two fixed halves with the arrow between, exactly the way the machine
           card itself reads: what it takes on the left, what it makes on the
           right, each item on its own line. */}

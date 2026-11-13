@@ -2269,7 +2269,10 @@ function toRecipeSummary(
     ),
     outputs: enrichedRecipe.outputs.map((resource) => hydrateResource(resource, resourcesByKey)),
     source: enrichedRecipe.source?.recipeMap
-      ? { recipeMap: enrichedRecipe.source.recipeMap }
+      ? {
+          recipeMap: enrichedRecipe.source.recipeMap,
+          datasetVersionId: enrichedRecipe.source.datasetVersionId,
+        }
       : undefined,
     nei: enrichedRecipe.nei,
     slots: [],
