@@ -52,6 +52,20 @@ describe("steady-state AE2 pattern preview", () => {
     expect(pattern.exact).toBe(true);
   });
 
+  it("shows separately supplied net demand without using it to size the pattern", () => {
+    const product = balance("fluid", "ptfe", 0, 3);
+    const oxygen = balance("fluid", "oxygen", 1, 0);
+    const fluorine = balance("fluid", "fluorine", 3, 0);
+    const flow = result(product, oxygen, fluorine);
+    expect(makeSteadyStatePattern(flow, product.key, 1000)?.suggestedBatchAmount).toBe(3000);
+    const pattern = makeSteadyStatePattern(flow, product.key, 1000, new Set([oxygen.key]));
+    expect(pattern?.inputs.map((entry) => entry.key)).toEqual([fluorine.key]);
+    expect(pattern?.separatelySupplied.map((entry) => entry.key)).toEqual([oxygen.key]);
+    expect(pattern?.separatelySupplied[0]?.amount).toBeCloseTo(1000 / 3);
+    expect(pattern?.suggestedBatchAmount).toBeUndefined();
+    expect(pattern?.exact).toBe(true);
+  });
+
   it("keeps a fractional batch visibly fractional and flags buffer accumulation", () => {
     const buffer = balance("fluid", "waste", 0, 0);
     buffer.bufferFillPerSecond = 1;

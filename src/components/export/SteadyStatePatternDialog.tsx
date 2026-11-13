@@ -24,8 +24,18 @@ export function SteadyStatePatternDialog({ result, projectName, onClose }: {
   );
   const [targetKey, setTargetKey] = useState<ResourceKey | undefined>((namedTarget ?? targets[0])?.key);
   const [amount, setAmount] = useState(1000);
+  const [separateSupply, setSeparateSupply] = useState<ReadonlySet<ResourceKey>>(() => new Set());
   const target = targets.find((entry) => entry.key === targetKey);
-  const pattern = targetKey ? makeSteadyStatePattern(result, targetKey, amount) : undefined;
+  const pattern = targetKey ? makeSteadyStatePattern(result, targetKey, amount, separateSupply) : undefined;
+
+  function toggleSeparateSupply(key: ResourceKey) {
+    setSeparateSupply((current) => {
+      const next = new Set(current);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }
 
   return (
     <div
@@ -62,9 +72,10 @@ export function SteadyStatePatternDialog({ result, projectName, onClose }: {
         {pattern ? (
           <>
             <div className="grid gap-3 sm:grid-cols-2">
-              <PatternList title="Inputs to request" amounts={pattern.inputs} />
+              <PatternList title="Inputs to request" amounts={pattern.inputs} onToggleSeparateSupply={toggleSeparateSupply} />
               <PatternList title="Outputs to return" amounts={pattern.outputs} />
             </div>
+            {pattern.separatelySupplied.length ? <PatternList title="Supplied separately" amounts={pattern.separatelySupplied} separatelySupplied onToggleSeparateSupply={toggleSeparateSupply} /> : null}
             {pattern.recirculated.length ? <PatternList title="Returned to supply" amounts={pattern.recirculated} /> : null}
             {pattern.warnings.length ? <div className="rounded border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-fg-subtle">
               {pattern.warnings.map((warning) => <p key={warning} className="mb-1 last:mb-0">{warning}</p>)}
@@ -78,13 +89,24 @@ export function SteadyStatePatternDialog({ result, projectName, onClose }: {
   );
 }
 
-function PatternList({ title, amounts }: { title: string; amounts: PatternAmount[] }) {
+function PatternList({ title, amounts, separatelySupplied = false, onToggleSeparateSupply }: {
+  title: string;
+  amounts: PatternAmount[];
+  separatelySupplied?: boolean;
+  onToggleSeparateSupply?: (key: ResourceKey) => void;
+}) {
   return <section className="rounded border border-line-strong bg-surface-sunken p-3">
     <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-fg-muted">{title}</h3>
     {amounts.length ? <ul className="space-y-1 text-sm">
-      {amounts.map((entry) => <li key={entry.key} className="flex justify-between gap-3">
-        <span>{entry.label}</span>
-        <span className="shrink-0 tabular-nums">{entry.wholeAmount?.toLocaleString() ?? entry.amount.toFixed(3)} {entry.kind === "fluid" ? "L" : "items"}</span>
+      {amounts.map((entry) => <li key={entry.key}>
+        <div className="flex justify-between gap-3">
+          <span>{entry.label}</span>
+          <span className="shrink-0 tabular-nums">{entry.wholeAmount?.toLocaleString() ?? entry.amount.toFixed(3)} {entry.kind === "fluid" ? "L" : "items"}</span>
+        </div>
+        {onToggleSeparateSupply ? <label className="flex w-fit items-center gap-1.5 text-xs text-fg-muted">
+          <input type="checkbox" aria-label={`Supply ${entry.label} separately`} checked={separatelySupplied} onChange={() => onToggleSeparateSupply(entry.key)} />
+          Supplied separately
+        </label> : null}
       </li>)}
     </ul> : <p className="text-xs text-fg-muted">None</p>}
   </section>;

@@ -16,6 +16,7 @@ export interface PatternAmount {
 export interface SteadyStatePattern {
   target: PatternAmount;
   inputs: PatternAmount[];
+  separatelySupplied: PatternAmount[];
   outputs: PatternAmount[];
   recirculated: PatternAmount[];
   warnings: string[];
@@ -35,6 +36,7 @@ export function makeSteadyStatePattern(
   result: ThroughputResult,
   targetKey: ResourceKey,
   targetAmount: number,
+  separateSupply?: ReadonlySet<ResourceKey>,
 ): SteadyStatePattern | undefined {
   const target = result.resources[targetKey];
   const targetRate = target?.productPerSecond - target?.importedPerSecond;
@@ -43,6 +45,7 @@ export function makeSteadyStatePattern(
   }
   const scale = targetAmount / targetRate;
   const inputs: PatternAmount[] = [];
+  const separatelySupplied: PatternAmount[] = [];
   const outputs: PatternAmount[] = [];
   const recirculated: PatternAmount[] = [];
   const warnings: string[] = [];
@@ -61,7 +64,10 @@ export function makeSteadyStatePattern(
         ...(Math.abs(amount - rounded) <= INTEGER_TOLERANCE ? { wholeAmount: rounded } : {}),
       };
     };
-    if (imported - shipped > EPSILON) inputs.push(makeAmount(imported - shipped));
+    if (imported - shipped > EPSILON) {
+      const destination = separateSupply?.has(balance.key) ? separatelySupplied : inputs;
+      destination.push(makeAmount(imported - shipped));
+    }
     if (shipped - imported > EPSILON) outputs.push(makeAmount(shipped - imported));
     if (Math.min(imported, shipped) > EPSILON) recirculated.push(makeAmount(Math.min(imported, shipped)));
     if (balance.bufferFillPerSecond > EPSILON) {
@@ -87,11 +93,13 @@ export function makeSteadyStatePattern(
   if (recirculated.length) warnings.push("Route returned materials back to the matching inputs and prime those buffers before requesting the first batch.");
   const sort = (a: PatternAmount, b: PatternAmount) => a.label.localeCompare(b.label);
   inputs.sort(sort);
+  separatelySupplied.sort(sort);
   outputs.sort(sort);
   recirculated.sort(sort);
   return {
     target: makeTargetAmount(target, targetAmount),
     inputs,
+    separatelySupplied,
     outputs,
     recirculated,
     warnings,
