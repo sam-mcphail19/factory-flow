@@ -1946,7 +1946,7 @@ const CompactRecipeCard = memo(function CompactRecipeCard({
     if (ebfTemperature === undefined) return undefined;
     return getNodePowerReport(preview, {
       overclockTier: ebfVoltage,
-      machineConfigTiers: { heatingCoil: ebfCoil },
+      coilTier: ebfCoil,
     });
   }, [preview, ebfTemperature, ebfCoil, ebfVoltage]);
   const machineLabel = primary?.label ?? recipe.machineType;
